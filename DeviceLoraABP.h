@@ -31,9 +31,6 @@ public:
         this->SetNwkskey(this->nwkskey);
         this->SetDeviceEUI(this->deviceEui);
         this->SetActiveRegion(this->bandRegion);
-
-        this->SetConfirmMode(true);
-        this->SetNumberOfRetransmissions(7);
     }
 
     String GetAppskey() {

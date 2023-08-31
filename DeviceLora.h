@@ -61,15 +61,6 @@ protected:
             break;
 
         }
-        
-        /*
-        if (api.lorawan.appskey.set(arrayAppskey, length) == true) {
-            Serial.println("Application Key Enviada!!!");
-
-        } else {
-            Serial.println("Erro!");
-        }
-        */
     }
 
 public:
@@ -94,6 +85,20 @@ public:
         }
 
         if (api.lorawan.send(sizeof(payload), payload, port)) {
+            Serial.println(data + " enviado na porta " + port + ".");
+        } else {
+            Serial.println("Erro ao enviar.");
+        }
+    }
+
+    void SendData(int port, String data, int numRetries) {
+        uint8_t payload[data.length()];
+
+        for (int i = 0; i < data.length(); i++) {
+            payload[i] = data[i];
+        }
+
+        if (api.lorawan.send(sizeof(payload), payload, port, true, numRetries)) {
             Serial.println(data + " enviado na porta " + port + ".");
         } else {
             Serial.println("Erro ao enviar.");
