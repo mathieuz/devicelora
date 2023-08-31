@@ -8,14 +8,73 @@ protected:
     int joinMode;
     char classMode;
     String deviceEui;
-    int adaptiveRate;
-    int dataRate;
-    int transmitPower;
-    int bandRegion = 6;
+    int bandRegion = RAK_REGION_AU915;
+
+    enum ActivationKey{DEVICE_ADDRESS, APPSKEY, NWKSKEY, DEVICE_EUI};
+
+    void SetActivationKey(ActivationKey activationKey, String key, uint length) {
+        length = length / 2;
+
+        uint8_t arrayKey[length];
+        int indexArray = 0;
+
+        key.toLowerCase();
+
+        for (int i = 0; i < length * 2; i += 2) {
+            uint8_t hex1 = 0x00;
+            uint8_t hex2 = 0x00;
+            
+            if (key[i] >= 'a' && key[i] <= 'f') {
+                hex1 = key[i] - 87;
+
+            } else if (key[i] >= '0' && key[i] <= '9') {
+                hex1 = key[i] - 48;
+            }
+
+            if (key[i + 1] >= 'a' && key[i + 1] <= 'f') {
+                hex2 = key[i + 1] - 87;
+
+            } else if (key[i + 1] >= '0' && key[i + 1] <= '9') {
+                hex2 = key[i + 1] - 48;
+            }
+
+            arrayKey[indexArray] = (hex1 << 4) + hex2;
+            indexArray++;
+        }
+
+        switch (activationKey) {
+
+            case DEVICE_ADDRESS:
+                api.lorawan.daddr.set(arrayKey, length);
+            break;
+
+            case APPSKEY:
+                api.lorawan.appskey.set(arrayKey, length);
+            break;
+
+            case NWKSKEY:
+                api.lorawan.nwkskey.set(arrayKey, length);
+            break;
+
+            case DEVICE_EUI:
+                api.lorawan.deui.set(arrayKey, length);
+            break;
+
+        }
+        
+        /*
+        if (api.lorawan.appskey.set(arrayAppskey, length) == true) {
+            Serial.println("Application Key Enviada!!!");
+
+        } else {
+            Serial.println("Erro!");
+        }
+        */
+    }
 
 public:
     void JoinMode(int mode) {
-
+        api.lorawan.njm.set(mode);
     }
 
     String GetJoinMode() {
@@ -38,7 +97,7 @@ public:
             Serial.println(data + " enviado na porta " + port + ".");
         } else {
             Serial.println("Erro ao enviar.");
-        };
+        }
     }
 
     void SendLongPacketData(int port, bool ack, String data) {
@@ -66,7 +125,7 @@ public:
     }
 
     void SetConfirmMode(bool mode) {
-
+        api.lorawan.cfm.set(mode);
     }
 
     int GetNumberOfRetransmissions() {
@@ -74,7 +133,7 @@ public:
     }
 
     void SetNumberOfRetransmissions(int val) {
-
+        api.lorawan.rety.set(val);
     }
 
     int GetActiveRegion() {
@@ -82,7 +141,7 @@ public:
     }
 
     void SetActiveRegion(int bandRegion) {
-
+        api.lorawan.band.set(bandRegion);
     }
 
     String GetNetworkId() {
@@ -104,7 +163,7 @@ public:
     }
 
     void SetDeviceEUI(String deviceEui) {
-
+        this->SetActivationKey(DEVICE_EUI, deviceEui, deviceEui.length());
     }
 
     int GetAdaptiveRate() {
