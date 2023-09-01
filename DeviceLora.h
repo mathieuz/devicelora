@@ -63,6 +63,61 @@ protected:
         }
     }
 
+    String GetActivationKey(ActivationKey activationKey, int length) {
+        uint8_t arrayKey[length];
+
+        switch (activationKey) {
+            case DEVICE_ADDRESS:
+                api.lorawan.daddr.get(arrayKey, length);
+            break;
+
+            case APPSKEY:
+                api.lorawan.appskey.get(arrayKey, length);
+            break;
+
+            case NWKSKEY:
+                api.lorawan.nwkskey.get(arrayKey, length);
+            break;
+
+            case DEVICE_EUI:
+                api.lorawan.deui.get(arrayKey, length);
+            break;
+        }
+
+        int dec = 0;
+        int res = 0;
+        String hex = "";
+        String finalhex = "";
+
+        for (int i = 0; i < length; i++) {
+            int dec = arrayKey[i];
+
+            while (dec != 0) {
+                res = dec % 16;
+                dec = dec / 16;
+
+                if (res >= 0 && res <= 9) {
+                    res = res + 48;
+
+                } else if (res >= 10 && res <= 15) {
+                    res = res + 55;
+
+                }
+
+                hex += (char) res;
+                
+            }
+
+            for (int i = hex.length() - 1; i != -1; i--) {
+                finalhex += hex[i];
+            }
+
+            hex = "";
+        }
+
+        return finalhex;
+    }
+
 public:
     void JoinMode(int mode) {
         api.lorawan.njm.set(mode);
@@ -164,7 +219,7 @@ public:
     //
 
     String GetDeviceEUI() {
-
+        this->GetActivationKey(DEVICE_EUI, 8);
     }
 
     void SetDeviceEUI(String deviceEui) {

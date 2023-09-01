@@ -34,17 +34,7 @@ public:
     }
 
     String GetAppskey() {
-        String resultado;
-
-        uint8_t arrayAppskey[16];
-
-        api.lorawan.appskey.get(arrayAppskey, 16);
-
-        for (int i = 0; i < 32; i++) {
-            resultado += arrayAppskey[i];
-        }
-
-        return resultado;
+        return this->GetActivationKey(APPSKEY, 16);
     }
 
     void SetAppskey(String appskey) {
@@ -52,7 +42,7 @@ public:
     }
 
     String GetNwkskey() {
-
+        return this->GetActivationKey(NWKSKEY, 16);
     }
 
     void SetNwkskey(String nwkskey) {
@@ -60,7 +50,7 @@ public:
     }
 
     String GetDeviceAddress() {
-
+        this->GetActivationKey(DEVICE_ADDRESS, 4);
     }
 
     void SetDeviceAddress(String deviceAddress) {
