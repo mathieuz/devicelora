@@ -1,53 +1,28 @@
 #include "DeviceLoraABP.h"
 
+//Callbacks
+void SendCallback(int32_t status) {
+  Serial.printf("Status do Send: %d\r\n", status);
+}
+
+void JoinCallback(int32_t status) {
+  Serial.printf("Status do Join: %d\r\n", status);
+}
+
 void setup()
 {
   Serial.begin(115200);
-
-  /*
-  int arrayVal[4] = {66, 28, 91, 234};
-
-  int dec = 0;
-  int res = 0;
-  String hex = "";
-  String finalhex = "";
-
-  for (int i = 0; i < sizeof(arrayVal); i++) {
-    dec = arrayVal[i];
-
-    while (dec != 0) {
-      res = dec % 16;
-      dec = dec / 16;
-
-      if (res >= 0 && res <= 9) {
-        res = res + 48;
-
-      } else if (res >= 10 && res <= 15) {
-        res = res + 55;
-      }
-
-      hex += (char) res;
-    }
-
-    for (int i = hex.length() - 1; i != -1; i--) {
-      finalhex += hex[i];
-    }
-
-    hex = "";
-
-  }
-
-  Serial.println(finalhex);
-  */
+  api.lorawan.registerSendCallback(SendCallback);
+  api.lorawan.registerJoinCallback(JoinCallback);
 }
 
 void loop()
 {
   delay(5000); //!!!
 
-  DeviceLoraABP deviceLoraABP("021c38e7", "421ce74d9cd8cb17d9bae5a68f1f1afd", "85e270057406be1097720b304d181f84", "ac1f09fffe090b61");
-
-  Serial.println(deviceLoraABP.GetNwkskey());
+  DeviceLoraABP abp("020d7a66", "83652f53f69a54fe23fe2ee699c5d491", "83c92b78a26802bca3d8a4ecf3d717f9", "AC1F09FFFE090B61");
 
   delay(2000);
+
+  Serial.println(abp.GetDeviceEUI());
 }

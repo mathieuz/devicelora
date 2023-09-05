@@ -50,7 +50,7 @@ public:
     }
 
     String GetDeviceAddress() {
-        this->GetActivationKey(DEVICE_ADDRESS, 4);
+        return this->GetActivationKey(DEVICE_ADDRESS, 4);
     }
 
     void SetDeviceAddress(String deviceAddress) {

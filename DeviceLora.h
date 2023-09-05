@@ -84,35 +84,32 @@ protected:
             break;
         }
 
-        int dec = 0;
-        int res = 0;
-        String hex = "";
-        String finalhex = "";
+        char hex1;
+        char hex2;
+        String finalhex;
 
         for (int i = 0; i < length; i++) {
-            int dec = arrayKey[i];
+            hex1 = (arrayKey[i] & 0xF0) >> 4;
+            hex2 = arrayKey[i] & 0x0F;
 
-            while (dec != 0) {
-                res = dec % 16;
-                dec = dec / 16;
+            if (hex1 >= 0 && hex1 <= 9) {
+                hex1 += 48;
 
-                if (res >= 0 && res <= 9) {
-                    res = res + 48;
+            } else if (hex1 >= 10 && hex1 <= 15) {
+                hex1 += 55;
 
-                } else if (res >= 10 && res <= 15) {
-                    res = res + 55;
-
-                }
-
-                hex += (char) res;
-                
             }
 
-            for (int i = hex.length() - 1; i != -1; i--) {
-                finalhex += hex[i];
+            if (hex2 >= 0 && hex2 <= 9) {
+                hex2 += 48;
+
+            } else if (hex2 >= 10 && hex2 <= 15) {
+                hex2 += 55;
+
             }
 
-            hex = "";
+            finalhex += (char) hex1;
+            finalhex += (char) hex2;
         }
 
         return finalhex;
@@ -146,14 +143,14 @@ public:
         }
     }
 
-    void SendData(int port, String data, int numRetries) {
+    void SendData(int port, String data, int retries) {
         uint8_t payload[data.length()];
 
         for (int i = 0; i < data.length(); i++) {
             payload[i] = data[i];
         }
 
-        if (api.lorawan.send(sizeof(payload), payload, port, true, numRetries)) {
+        if (api.lorawan.send(sizeof(payload), payload, port, true, retries)) {
             Serial.println(data + " enviado na porta " + port + ".");
         } else {
             Serial.println("Erro ao enviar.");
@@ -219,7 +216,7 @@ public:
     //
 
     String GetDeviceEUI() {
-        this->GetActivationKey(DEVICE_EUI, 8);
+        return this->GetActivationKey(DEVICE_EUI, 8);
     }
 
     void SetDeviceEUI(String deviceEui) {
