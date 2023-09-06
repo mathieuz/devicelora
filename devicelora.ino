@@ -1,4 +1,5 @@
 #include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
 
 //Callbacks
 void SendCallback(int32_t status) {
@@ -20,9 +21,10 @@ void loop()
 {
   delay(5000); //!!!
 
-  DeviceLoraABP abp("020d7a66", "83652f53f69a54fe23fe2ee699c5d491", "83c92b78a26802bca3d8a4ecf3d717f9", "AC1F09FFFE090B61");
+  DeviceLoraABP abp("026a42dc", "0813fa6348559dc537034fe9e08f380f", "446ebbf49a04bc2811ba07dc877a2c6e", "AC1F09FFFE090B61", 'A');
 
   delay(2000);
 
-  Serial.println(abp.GetDeviceEUI());
+  abp.SendData(8, "ABP Teste!!! 4321", 7);
+
 }

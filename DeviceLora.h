@@ -10,7 +10,7 @@ protected:
     String deviceEui;
     int bandRegion = RAK_REGION_AU915;
 
-    enum ActivationKey{DEVICE_ADDRESS, APPSKEY, NWKSKEY, DEVICE_EUI};
+    enum ActivationKey{DEVICE_ADDRESS, APPSKEY, NWKSKEY, DEVICE_EUI, APPKEY, APPEUI};
 
     void SetActivationKey(ActivationKey activationKey, String key, uint length) {
         length = length / 2;
@@ -60,6 +60,14 @@ protected:
                 api.lorawan.deui.set(arrayKey, length);
             break;
 
+            case APPKEY:
+                api.lorawan.appkey.set(arrayKey, length);
+            break;
+
+            case APPEUI:
+                api.lorawan.appeui.set(arrayKey, length);
+            break;
+
         }
     }
 
@@ -81,6 +89,14 @@ protected:
 
             case DEVICE_EUI:
                 api.lorawan.deui.get(arrayKey, length);
+            break;
+
+            case APPKEY:
+                api.lorawan.appkey.get(arrayKey, length);
+            break;
+
+            case APPEUI:
+                api.lorawan.appeui.get(arrayKey, length);
             break;
         }
 
@@ -232,11 +248,38 @@ public:
     }
 
     char GetClass() {
+        char deviceClass;
 
+        switch (api.lorawan.deviceClass.get()) {
+            case 0: deviceClass = 'A'; break;
+            case 1: deviceClass = 'B'; break;
+            case 2: deviceClass = 'C'; break;
+        }
+
+        return deviceClass;
     }
 
     void SetClass(char classMode) {
+        int deviceClass;
 
+        switch (classMode) {
+            case 'A':
+            case 'a': 
+                deviceClass = 0; 
+            break;
+
+            case 'B':
+            case 'b':
+                deviceClass = 1; 
+            break;
+
+            case 'C':
+            case 'c':
+                deviceClass = 2;
+            break;
+        }
+
+        api.lorawan.deviceClass.set(deviceClass);
     }
 
     int GetDataRate() {

@@ -7,45 +7,46 @@ class DeviceLoraOTAA : public DeviceLora
 {
 
 private:
-    uint16_t appkey;
-    uint8_t applicationIdentifier;
+    String appkey;
 
 public:
 
-/*
-    DeviceLoraOTAA(uint16_t appkey, uint8_t applicationIdentifier, char classMode, int adaptiveRate, int transmitPower){
+    DeviceLoraOTAA(String appkey, String deviceEui, char classMode) {
+        this->JoinMode(RAK_LORA_OTAA);
+
         this->appkey = appkey;
-        this->applicationIdentifier = applicationIdentifier;
-        this->joinMode = 1;
+        this->deviceEui = deviceEui;
         this->classMode = classMode;
-        this->adaptiveRate = adaptiveRate;
-        this->dataRate = dataRate;
-        this->transmitPower = transmitPower;
-    }
-*/
+        this->bandRegion = this->bandRegion;
 
-    DeviceLoraOTAA() {
+        this->SetAppkey(this->appkey);
+        this->SetDeviceEUI(this->deviceEui);
+        this->SetClass(this->classMode);
+        this->SetActiveRegion(this->bandRegion);
 
+        if (this->GetNetworkJoinStatus() == 0) {
+            this->Join();
+        }
     }
 
     void Join() {
-        
+        api.lorawan.join();
     }
 
     String GetAppkey() {
-        return "Teste GetAppkey";
+        return this->GetActivationKey(APPKEY, 16);
     }
 
     void SetAppkey(String appkey) {
-
+        this->SetActivationKey(APPKEY, appkey, appkey.length());
     }
 
     String GetApplicationIdentifier() {
-
+        return this->GetActivationKey(APPEUI, 8);
     }
 
     void SetApplicationIdentifier(String appeui) {
-
+        this->SetActivationKey(APPEUI, appeui, appeui.length());
     }
 };
 

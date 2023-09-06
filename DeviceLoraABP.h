@@ -7,29 +7,27 @@ class DeviceLoraABP : public DeviceLora
 {
 
 private:
-    /*uint8_t appskey;
-    uint16_t nwkskey;
-    uint8_t deviceAddress;*/
-
     String appskey;
     String nwkskey;
     String deviceAddress;
 
 public:
 
-    DeviceLoraABP(String deviceAddress, String appskey, String nwkskey, String deviceEui) {
+    DeviceLoraABP(String deviceAddress, String appskey, String nwkskey, String deviceEui, char classMode) {
         this->JoinMode(RAK_LORA_ABP);
 
         this->deviceAddress = deviceAddress;
         this->appskey = appskey;
         this->nwkskey = nwkskey;
         this->deviceEui = deviceEui;
+        this->classMode = classMode;
         this->bandRegion = this->bandRegion;
 
         this->SetDeviceAddress(this->deviceAddress);
         this->SetAppskey(this->appskey);
         this->SetNwkskey(this->nwkskey);
         this->SetDeviceEUI(this->deviceEui);
+        this->SetClass(this->classMode);
         this->SetActiveRegion(this->bandRegion);
     }
 
