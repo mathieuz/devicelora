@@ -6,12 +6,19 @@ class DeviceLora
 
 protected:
     int joinMode;
-    char classMode;
+    String appskey;
+    String nwkskey;
+    String deviceAddress;
     String deviceEui;
+    char classMode;
     int bandRegion = RAK_REGION_AU915;
 
     enum ActivationKey{DEVICE_ADDRESS, APPSKEY, NWKSKEY, DEVICE_EUI, APPKEY, APPEUI};
 
+    /// @brief Preenche e define um vetor de chave de ativação.
+    /// @param activationKey Tipo de chave de ativação.
+    /// @param key Chave de ativação.
+    /// @param length Comprimento da chave de ativação.
     void SetActivationKey(ActivationKey activationKey, String key, uint length) {
         length = length / 2;
 
@@ -71,6 +78,10 @@ protected:
         }
     }
 
+    /// @brief Retorna a String de uma chave de ativação.
+    /// @param activationKey Tipo de chave de ativação.
+    /// @param length Comprimento do buffer/vetor do tipo de chave de ativação.
+    /// @return String
     String GetActivationKey(ActivationKey activationKey, int length) {
         uint8_t arrayKey[length];
 
@@ -132,18 +143,27 @@ protected:
     }
 
 public:
+    /// @brief Define o modo de conexão.
+    /// @param mode Modo de conexão (0 = ABP, 1 = OTAA)
     void JoinMode(int mode) {
         api.lorawan.njm.set(mode);
     }
 
+    /// @brief Join Mode - retorna o modo de conexão definido ("OTAA" ou "ABP").
+    /// @return String ("OTAA" ou "ABP")
     String GetJoinMode() {
         return api.lorawan.njm.get() ? "OTAA" : "ABP";
     }
 
-    int GetNetworkJoinStatus() {
+    /// @brief Join Status - retorna o status de conexão atual do dispositivo.
+    /// @return bool (0 = Not Joined, 1 = Joined)
+    bool GetNetworkJoinStatus() {
         return api.lorawan.njs.get();
     }
 
+    /// @brief Envia informação para uma porta especificada.
+    /// @param port Número da porta (de 1 à 233).
+    /// @param data Informação à ser enviada.
     void SendData(int port, String data) {
 
         uint8_t payload[data.length()];
@@ -159,6 +179,10 @@ public:
         }
     }
 
+    /// @brief Envia informação para uma porta especificada.
+    /// @param port Número da porta (de 1 à 233).
+    /// @param data Informação à ser enviada.
+    /// @param retries Número de tentativas de envio.
     void SendData(int port, String data, int retries) {
         uint8_t payload[data.length()];
 
@@ -178,7 +202,7 @@ public:
     }
 
     String GetLastReceivedTextData() {
-
+        
     }
 
     int GetRSSIOnReception() {
@@ -231,10 +255,32 @@ public:
 
     //
 
+    /// @brief Retorna Appskey definido.
+    /// @return String
+    String GetAppskey() {
+        return this->GetActivationKey(APPSKEY, 16);
+    }
+
+    /// @brief Retorna Nwkskey definido.
+    /// @return String
+    String GetNwkskey() {
+        return this->GetActivationKey(NWKSKEY, 16);
+    }
+
+    /// @brief Retorna Nwkskey definido.
+    /// @return String
+    String GetDeviceAddress() {
+        return this->GetActivationKey(DEVICE_ADDRESS, 4);
+    }
+
+    /// @brief Retorna DeviceEUI definido.
+    /// @return String
     String GetDeviceEUI() {
         return this->GetActivationKey(DEVICE_EUI, 8);
     }
 
+    /// @brief Define DeviceEUI.
+    /// @param deviceEui 
     void SetDeviceEUI(String deviceEui) {
         this->SetActivationKey(DEVICE_EUI, deviceEui, deviceEui.length());
     }

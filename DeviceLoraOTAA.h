@@ -29,14 +29,19 @@ public:
         }
     }
 
+    /// @brief Conecta a uma rede LoRaWAN (modo OTAA).
     void Join() {
         api.lorawan.join();
     }
 
+    /// @brief Retorna Appkey definido.
+    /// @return String
     String GetAppkey() {
         return this->GetActivationKey(APPKEY, 16);
     }
 
+    /// @brief Define Appkey.
+    /// @param appkey 
     void SetAppkey(String appkey) {
         this->SetActivationKey(APPKEY, appkey, appkey.length());
     }

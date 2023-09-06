@@ -25,6 +25,6 @@ void loop()
 
   delay(2000);
 
-  abp.SendData(8, "ABP Teste!!! 4321", 7);
+  Serial.println();
 
 }

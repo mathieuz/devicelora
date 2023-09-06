@@ -6,11 +6,6 @@
 class DeviceLoraABP : public DeviceLora
 {
 
-private:
-    String appskey;
-    String nwkskey;
-    String deviceAddress;
-
 public:
 
     DeviceLoraABP(String deviceAddress, String appskey, String nwkskey, String deviceEui, char classMode) {
@@ -31,26 +26,20 @@ public:
         this->SetActiveRegion(this->bandRegion);
     }
 
-    String GetAppskey() {
-        return this->GetActivationKey(APPSKEY, 16);
-    }
-
+    /// @brief Define Appskey.
+    /// @param appskey 
     void SetAppskey(String appskey) {
         this->SetActivationKey(APPSKEY, appskey, appskey.length());
     }
 
-    String GetNwkskey() {
-        return this->GetActivationKey(NWKSKEY, 16);
-    }
-
+    /// @brief Define Nwkskey.
+    /// @param nwkskey
     void SetNwkskey(String nwkskey) {
         this->SetActivationKey(NWKSKEY, nwkskey, nwkskey.length());
     }
 
-    String GetDeviceAddress() {
-        return this->GetActivationKey(DEVICE_ADDRESS, 4);
-    }
-
+    /// @brief Define Device Address.
+    /// @param deviceAddress 
     void SetDeviceAddress(String deviceAddress) {
         this->SetActivationKey(DEVICE_ADDRESS, deviceAddress, deviceAddress.length());
     }
