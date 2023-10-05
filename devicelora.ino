@@ -23,7 +23,7 @@ void setup()
   
   delay(2000);
   
-  abp.RemoveMulticastGroup("aabbccdd");
+  abp.ListMulticastGroups();
 
 }
 

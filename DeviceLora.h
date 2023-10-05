@@ -374,6 +374,41 @@ public:
         api.lorawan.rmvmulc(mcKeyAddress[0] << 24 | mcKeyAddress[1] << 16 | mcKeyAddress[2] << 8 | mcKeyAddress[3]);
     }
 
+    void ListMulticastGroups() {
+        RAK_LORA_McSession multicast_list;
+
+        while (api.lorawan.lstmulc(&multicast_list) == true) {
+
+            if (multicast_list.McDevclass != 0) {
+                Serial.printf("Multicast Device Class = %d\r\n", multicast_list.McDevclass);
+                Serial.printf("Multicast Device Address = %08X\r\n", multicast_list.McAddress);
+
+                Serial.print("Multicast APPSKEY =");
+
+                for (int i=0; i<16; i++) {
+                    Serial.printf("%02X", multicast_list.McAppSKey[i]);
+                }
+
+                Serial.println("");
+
+                Serial.print("Multicast NWKSKEY =");
+                for (int i=0; i<16; i++) {
+                    Serial.printf("%02X", multicast_list.McNwkSKey[i]);
+                }
+
+                Serial.println("");
+
+                Serial.printf("Frequência = %d\r\n", multicast_list.McFrequency);
+                Serial.printf("Data Rate = %d\r\n", multicast_list.McDatarate);
+                Serial.printf("Periodicidade = %d\r\n", multicast_list.McPeriodicity);
+                //Serial.printf("Group ID = %d\r\n", multicast_list.McGroupID);
+                Serial.printf("Entry = %d\r\n", multicast_list.entry);
+
+                Serial.println("");
+            }
+        }
+    }
+
     String GetLastReceivedTextData() {
         
     }
