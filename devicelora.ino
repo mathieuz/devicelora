@@ -15,16 +15,15 @@ void setup()
   Serial.begin(115200);
   api.lorawan.registerSendCallback(SendCallback);
   api.lorawan.registerJoinCallback(JoinCallback);
+
+  delay(5000);
+
+  DeviceLoraABP abp("0271a1ca", "fea60afdd4cfec1ae34dc92c135ea228", "8b989d48cca9f7a1a929330b9ae2ca35", "AC1F09FFFE090B61", 'C');
+  abp.AddMulticastGroup('C', "aabbccdd", "31bb0739b191b43663e141664ce706e2", "5f2fb2119333ce6c3b0482f85c9d1f46", 923300000, 8, 0, 4, 0);
+
 }
 
 void loop()
 {
-  delay(5000); //!!!
-
-  DeviceLoraABP abp("026a42dc", "0813fa6348559dc537034fe9e08f380f", "446ebbf49a04bc2811ba07dc877a2c6e", "AC1F09FFFE090B61", 'A');
-
-  delay(2000);
-
-  Serial.println();
-
+  
 }

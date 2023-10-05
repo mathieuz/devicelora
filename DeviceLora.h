@@ -142,6 +142,94 @@ protected:
         return finalhex;
     }
 
+    //Private method
+    void GetHexMulticastKeys(uint8_t mcKeyAddress[4], uint8_t mcKeyNwkskey[16], uint8_t mcKeyAppskey[16], String mcKeyStrAddress, String mcKeyStrNwkskey, String mcKeyStrAppskey){
+        mcKeyStrAddress.toLowerCase();
+        mcKeyStrNwkskey.toLowerCase();
+        mcKeyStrAppskey.toLowerCase();
+
+        uint8_t hex1 = 0x00;
+        uint8_t hex2 = 0x00;
+
+        uint indexArray = 0;
+
+        //Preenchendo mc_arr_address (Multicast Device Address)
+        for (int i = 0; i < mcKeyStrAddress.length(); i += 2) {
+
+            if (mcKeyStrAddress[i] >= 'a' && mcKeyStrAddress[i] <= 'f') {
+                hex1 = mcKeyStrAddress[i] - 87;
+
+            } else if (mcKeyStrAddress[i] >= '0' && mcKeyStrAddress[i] <= '9') {
+                hex1 = mcKeyStrAddress[i] - 48;
+
+            }
+
+            if (mcKeyStrAddress[i + 1] >= 'a' && mcKeyStrAddress[i + 1] <= 'f') {
+                hex2 = mcKeyStrAddress[i + 1] - 87;
+
+            } else if (mcKeyStrAddress[i + 1] >= '0' && mcKeyStrAddress[i + 1] <= '9') {
+                hex2 = mcKeyStrAddress[i + 1] - 48;
+
+            }
+
+            mcKeyAddress[indexArray] = (hex1 << 4) + hex2;
+            indexArray++;
+
+        }
+
+        indexArray = 0;
+
+        //Preenchendo mc_arr_nwkskey (Multicast Nwkskey)
+        for (int i = 0; i < mcKeyStrNwkskey.length(); i += 2) {
+
+            if (mcKeyStrNwkskey[i] >= 'a' && mcKeyStrNwkskey[i] <= 'f') {
+                hex1 = mcKeyStrNwkskey[i] - 87;
+
+            } else if (mcKeyStrNwkskey[i] >= '0' && mcKeyStrNwkskey[i] <= '9') {
+                hex1 = mcKeyStrNwkskey[i] - 48;
+
+            }
+
+            if (mcKeyStrNwkskey[i + 1] >= 'a' && mcKeyStrNwkskey[i + 1] <= 'f') {
+                hex2 = mcKeyStrNwkskey[i + 1] - 87;
+
+            } else if (mcKeyStrNwkskey[i + 1] >= '0' && mcKeyStrNwkskey[i + 1] <= '9') {
+                hex2 = mcKeyStrNwkskey[i + 1] - 48;
+
+            }
+
+            mcKeyNwkskey[indexArray] = (hex1 << 4) + hex2;
+            indexArray++;
+
+        }
+
+        indexArray = 0;
+
+        //Preenchendo mc_arr_appskey (Multicast Appskey)
+        for (int i = 0; i < mcKeyStrAppskey.length(); i += 2) {
+
+            if (mcKeyStrAppskey[i] >= 'a' && mcKeyStrAppskey[i] <= 'f') {
+                hex1 = mcKeyStrAppskey[i] - 87;
+
+            } else if (mcKeyStrAppskey[i] >= '0' && mcKeyStrAppskey[i] <= '9') {
+                hex1 = mcKeyStrAppskey[i] - 48;
+
+            }
+
+            if (mcKeyStrAppskey[i + 1] >= 'a' && mcKeyStrAppskey[i + 1] <= 'f') {
+                hex2 = mcKeyStrAppskey[i + 1] - 87;
+
+            } else if (mcKeyStrAppskey[i + 1] >= '0' && mcKeyStrAppskey[i + 1] <= '9') {
+                hex2 = mcKeyStrAppskey[i + 1] - 48;
+
+            }
+
+            mcKeyAppskey[indexArray] = (hex1 << 4) + hex2;
+            indexArray++;
+        }
+
+    }
+
 public:
     /// @brief Define o modo de conexão.
     /// @param mode Modo de conexão (0 = ABP, 1 = OTAA)
@@ -199,6 +287,54 @@ public:
 
     void SendLongPacketData(int port, bool ack, String data) {
 
+    }
+
+    void AddMulticastGroup(char mcDeviceClass, String mcAddress, String mcNwkskey, String mcAppskey, uint mcFrequency, uint mcDatarate, uint mcPeriodicity, uint mcGroupID, uint mcEntry){
+        uint mcClass;
+
+        switch (mcDeviceClass) {
+            case 'A':
+            case 'a':
+                mcClass = 0;
+            break;
+
+            case 'B':
+            case 'b':
+                mcClass = 1;
+            break;
+
+            case 'C':
+            case 'c':
+                mcClass = 2;
+            break;
+        }
+
+        uint8_t mc_arr_address[4];
+        uint8_t mc_arr_nwkskey[16];
+        uint8_t mc_arr_appskey[16];
+
+        GetHexMulticastKeys(mc_arr_address, mc_arr_nwkskey, mc_arr_appskey, mcAddress, mcNwkskey, mcAppskey);
+
+        RAK_LORA_McSession session = {
+            .McDevclass = mcClass,
+            .McAddress = mc_arr_address[0]<<24 | mc_arr_address[1]<<16 | mc_arr_address[2]<<8 | mc_arr_address[3],
+            .McFrequency = mcFrequency,
+            .McDatarate = mcDatarate,
+            .McPeriodicity = mcPeriodicity,
+            .McGroupID = mcGroupID,
+            .entry = mcEntry,
+        };
+
+        memcpy(session.McAppSKey, mc_arr_appskey, 16);
+        memcpy(session.McNwkSKey, mc_arr_nwkskey, 16);
+
+        if(api.lorawan.addmulc(session) == true) {
+          Serial.println("Grupo de multicast adicionado com sucesso!");
+
+        } else {
+          Serial.println("Erro ao adicionar grupo de multicast.");
+
+        }
     }
 
     String GetLastReceivedTextData() {
@@ -437,6 +573,8 @@ public:
     String GetLocalTime() {
 
     }
+
+    //
 
 };
 
