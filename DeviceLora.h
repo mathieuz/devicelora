@@ -337,6 +337,43 @@ public:
         }
     }
 
+    void RemoveMulticastGroup(String mcAddress) {
+        mcAddress.toLowerCase();
+
+        uint8_t mcKeyAddress[4];
+
+        uint8_t hex1 = 0x00;
+        uint8_t hex2 = 0x00;
+
+        uint indexArray = 0;
+
+        //Preenchendo mc_arr_address (Multicast Device Address)
+        for (int i = 0; i < mcAddress.length(); i += 2) {
+
+            if (mcAddress[i] >= 'a' && mcAddress[i] <= 'f') {
+                hex1 = mcAddress[i] - 87;
+
+            } else if (mcAddress[i] >= '0' && mcAddress[i] <= '9') {
+                hex1 = mcAddress[i] - 48;
+
+            }
+
+            if (mcAddress[i + 1] >= 'a' && mcAddress[i + 1] <= 'f') {
+                hex2 = mcAddress[i + 1] - 87;
+
+            } else if (mcAddress[i + 1] >= '0' && mcAddress[i + 1] <= '9') {
+                hex2 = mcAddress[i + 1] - 48;
+
+            }
+
+            mcKeyAddress[indexArray] = (hex1 << 4) + hex2;
+            indexArray++;
+
+        }
+
+        api.lorawan.rmvmulc(mcKeyAddress[0] << 24 | mcKeyAddress[1] << 16 | mcKeyAddress[2] << 8 | mcKeyAddress[3]);
+    }
+
     String GetLastReceivedTextData() {
         
     }
