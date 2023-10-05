@@ -383,7 +383,7 @@ public:
                 Serial.printf("Multicast Device Class = %d\r\n", multicast_list.McDevclass);
                 Serial.printf("Multicast Device Address = %08X\r\n", multicast_list.McAddress);
 
-                Serial.print("Multicast APPSKEY =");
+                Serial.print("Multicast APPSKEY = ");
 
                 for (int i=0; i<16; i++) {
                     Serial.printf("%02X", multicast_list.McAppSKey[i]);
@@ -391,14 +391,14 @@ public:
 
                 Serial.println("");
 
-                Serial.print("Multicast NWKSKEY =");
+                Serial.print("Multicast NWKSKEY = ");
                 for (int i=0; i<16; i++) {
                     Serial.printf("%02X", multicast_list.McNwkSKey[i]);
                 }
 
                 Serial.println("");
 
-                Serial.printf("Frequência = %d\r\n", multicast_list.McFrequency);
+                Serial.printf("Frequencia = %d\r\n", multicast_list.McFrequency);
                 Serial.printf("Data Rate = %d\r\n", multicast_list.McDatarate);
                 Serial.printf("Periodicidade = %d\r\n", multicast_list.McPeriodicity);
                 //Serial.printf("Group ID = %d\r\n", multicast_list.McGroupID);
