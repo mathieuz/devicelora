@@ -82,7 +82,7 @@ protected:
     /// @param activationKey Tipo de chave de ativação.
     /// @param length Comprimento do buffer/vetor do tipo de chave de ativação.
     /// @return String
-    String GetActivationKey(ActivationKey activationKey, int length) {
+    String GetActivationKey(ActivationKey activationKey, uint length) {
         uint8_t arrayKey[length];
 
         switch (activationKey) {
