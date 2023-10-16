@@ -9,8 +9,6 @@ class DeviceLoraABP : public DeviceLora
 public:
 
     DeviceLoraABP(String deviceAddress, String appskey, String nwkskey, String deviceEui, char classMode) {
-        
-
         this->deviceAddress = deviceAddress;
         this->appskey = appskey;
         this->nwkskey = nwkskey;
@@ -23,7 +21,7 @@ public:
     /// @brief Inicializa instância de conexão.
     void Setup() {
         this->JoinMode(RAK_LORA_ABP);
-        
+
         this->SetDeviceAddress(this->deviceAddress);
         this->SetAppskey(this->appskey);
         this->SetNwkskey(this->nwkskey);
