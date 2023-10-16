@@ -20,27 +20,29 @@ void JoinCallback(int32_t status) {
   Serial.printf("Status do Join: %d\r\n", status);
 }
 
+DeviceLoraABP abp("02a57a8d", "827ca0c81799cb9bb4f99f87a754cbf1", "67e6d402c83a85939d937801317d2a22", "AC1F09FFFE090B61", 'C');
+
 void setup()
 {
   Serial.begin(115200);
-  
+
   api.lorawan.registerRecvCallback(RecvCallback);
   api.lorawan.registerSendCallback(SendCallback);
   api.lorawan.registerJoinCallback(JoinCallback);
 
-  DeviceLoraABP abp("0271a1ca", "fea60afdd4cfec1ae34dc92c135ea228", "8b989d48cca9f7a1a929330b9ae2ca35", "AC1F09FFFE090B61", 'C');
-
   delay(5000);
 
-  abp.AddMulticastGroup('C', "aabbccdd", "31bb0739b191b43663e141664ce706e2", "5f2fb2119333ce6c3b0482f85c9d1f46", 923300000, 8, 0, 4, 0);
-
-  delay(3000);
-
-  abp.ListMulticastGroups();
+  abp.Setup();
 
 }
 
 void loop()
 {
-  
+  delay(4000);
+  Serial.println("Teste Lib");
+  Serial.println(abp.GetAppskey());
+
+  delay(4000);
+
+  abp.SendData(8, "Teste123", 7);
 }
