@@ -12,20 +12,23 @@ private:
 public:
 
     DeviceLoraOTAA(String appkey, String deviceEui, char classMode) {
-        this->JoinMode(RAK_LORA_OTAA);
-
         this->appkey = appkey;
         this->deviceEui = deviceEui;
         this->classMode = classMode;
         this->bandRegion = this->bandRegion;
+    }
 
+    void Setup() {
+        this->JoinMode(RAK_LORA_OTAA);
+        
         this->SetAppkey(this->appkey);
         this->SetDeviceEUI(this->deviceEui);
         this->SetClass(this->classMode);
         this->SetActiveRegion(this->bandRegion);
 
-        if (this->GetNetworkJoinStatus() == 0) {
+        while (this->GetNetworkJoinStatus() == 0) {
             this->Join();
+            delay(5000);
         }
     }
 

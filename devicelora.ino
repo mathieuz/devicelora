@@ -20,7 +20,7 @@ void JoinCallback(int32_t status) {
   Serial.printf("Status do Join: %d\r\n", status);
 }
 
-DeviceLoraABP abp("02a57a8d", "827ca0c81799cb9bb4f99f87a754cbf1", "67e6d402c83a85939d937801317d2a22", "AC1F09FFFE090B61", 'C');
+DeviceLoraOTAA otaa("354966473fc1bcf2bcc4c6ab997ba5d2", "ac1f09fffe090b61", 'C');
 
 void setup()
 {
@@ -32,16 +32,16 @@ void setup()
 
   delay(5000);
 
-  abp.Setup();
+  otaa.Setup();
 }
 
 void loop()
 {
   delay(4000);
   Serial.println("Teste Lib");
-  Serial.println(abp.GetAppskey());
+  Serial.println(otaa.GetAppskey());
 
   delay(4000);
 
-  abp.SendData(8, "Teste123", 7);
+  otaa.SendData(8, "TesteOTAA!", 7);
 }
