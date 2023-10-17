@@ -6,6 +6,26 @@
 class DeviceLoraABP : public DeviceLora
 {
 
+private:
+    //Callbacks
+    static void RecvCallback(SERVICE_LORA_RECEIVE_T *data) {
+        Serial.println("[RECV] Recebido:");
+
+    for (int i = 0; i < data->BufferSize; i++) {
+        Serial.printf("%x", data->Buffer[i]);
+    }
+        Serial.print("\r\n");
+    }
+
+    static void SendCallback(int32_t status) {
+        Serial.printf("Status do Send: %d\r\n", status);
+    }
+
+    static void JoinCallback(int32_t status) {
+        Serial.printf("Status do Join: %d\r\n", status);
+    }
+
+
 public:
 
     DeviceLoraABP(String deviceAddress, String appskey, String nwkskey, String deviceEui, char classMode) {
@@ -20,6 +40,8 @@ public:
 
     /// @brief Inicializa instância de conexão.
     void Setup() {
+
+        //Enviando chaves + configurações do device
         this->JoinMode(RAK_LORA_ABP);
 
         this->SetDeviceAddress(this->deviceAddress);
@@ -28,6 +50,11 @@ public:
         this->SetDeviceEUI(this->deviceEui);
         this->SetClass(this->classMode);
         this->SetActiveRegion(this->bandRegion);
+
+        //Registrando callbacks
+        api.lorawan.registerRecvCallback(RecvCallback);
+        api.lorawan.registerSendCallback(SendCallback);
+        api.lorawan.registerJoinCallback(JoinCallback);
     }
 
     /// @brief Define Appskey.
