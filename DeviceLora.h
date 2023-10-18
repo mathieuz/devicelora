@@ -372,6 +372,8 @@ public:
         }
 
         api.lorawan.rmvmulc(mcKeyAddress[0] << 24 | mcKeyAddress[1] << 16 | mcKeyAddress[2] << 8 | mcKeyAddress[3]);
+    
+        Serial.println("Grupo de multicast removido com sucesso!");
     }
 
     void ListMulticastGroups() {
