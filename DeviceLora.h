@@ -142,7 +142,6 @@ protected:
         return finalhex;
     }
 
-    //Private method
     void GetHexMulticastKeys(uint8_t mcKeyAddress[4], uint8_t mcKeyNwkskey[16], uint8_t mcKeyAppskey[16], String mcKeyStrAddress, String mcKeyStrNwkskey, String mcKeyStrAppskey){
         mcKeyStrAddress.toLowerCase();
         mcKeyStrNwkskey.toLowerCase();
@@ -428,7 +427,7 @@ public:
     }
 
     bool GetConfirmMode() {
-
+        return api.lorawan.cfm.get();
     }
 
     void SetConfirmMode(bool mode) {
@@ -436,7 +435,7 @@ public:
     }
 
     int GetNumberOfRetransmissions() {
-
+        return api.lorawan.rety.get();
     }
 
     void SetNumberOfRetransmissions(int val) {
@@ -444,7 +443,7 @@ public:
     }
 
     int GetActiveRegion() {
-
+        return api.lorawan.band.get();
     }
 
     void SetActiveRegion(int bandRegion) {
