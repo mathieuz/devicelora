@@ -537,6 +537,38 @@ public:
         api.lorawan.deviceClass.set(deviceClass);
     }
 
+    float GetBatteryLevel(){
+        return api.system.bat.get();
+    }
+
+    /// @brief Habilita o modo sleep do dispositivo e todos seus componentes durante um período de tempo (em milissegundos).
+    /// @param time Tempo em milissegundos.
+    void SleepAll(int time){
+        api.system.sleep.all(time);
+    }
+
+    /// @brief Habilita o modo sleep do dispositivo por tempo indeterminado.
+    void SleepAll(){
+        api.system.sleep.all();
+    }
+
+    /// @brief Habilita o modo sleep do CPU do dispositivo durante um período de tempo (em milissegundos).
+    /// @param time Tempo em milissegundos.
+    void SleepCPU(int time){
+        api.system.sleep.cpu(time);
+    }
+
+    /// @brief Habilita o modo sleep do CPU do dispositivo por tempo indeterminado.
+    void SleepCPU(){
+        api.system.sleep.cpu();
+    }
+
+    /// @brief Habilita o modo sleep do dispositivo LoRa durante um período de tempo (em milissegundos).
+    /// @param time Tempo em milissegundos.
+    void SleepLoRa(int time){
+        api.system.sleep.lora(time);
+    }
+
     int GetDataRate() {
 
     }
