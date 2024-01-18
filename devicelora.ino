@@ -1,12 +1,10 @@
 #include "DeviceLoraABP.h"
 #include "DeviceLoraOTAA.h"
 
-void setup()
-{
+void setup() {
 
 }
 
-void loop()
-{
+void loop() {
 
 }

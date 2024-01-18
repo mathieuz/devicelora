@@ -12,6 +12,7 @@ protected:
     String deviceEui;
     char classMode;
     int bandRegion = RAK_REGION_AU915;
+    uint16_t channelMask;
 
     enum ActivationKey{DEVICE_ADDRESS, APPSKEY, NWKSKEY, DEVICE_EUI, APPKEY, APPEUI};
 
@@ -537,6 +538,8 @@ public:
         api.lorawan.deviceClass.set(deviceClass);
     }
 
+    /// @brief Retorna o nível de bateria atual do dispositivo.
+    /// @return float
     float GetBatteryLevel(){
         return api.system.bat.get();
     }
@@ -567,6 +570,10 @@ public:
     /// @param time Tempo em milissegundos.
     void SleepLoRa(int time){
         api.system.sleep.lora(time);
+    }
+
+    void SetChannelMask(uint16_t mask) {
+        api.lorawan.mask.set(&mask);
     }
 
     int GetDataRate() {
