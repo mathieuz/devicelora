@@ -51,6 +51,20 @@ public:
         this->classMode = classMode;
         this->bandRegion = this->bandRegion;
         this->channelMask = channelMask;
+
+        //Definindo todos os IOs na memória flash.
+        uint8_t arrData32bit[4];
+
+        for (uint32_t i = 0; i < 10; i++) {
+            uint32_t data = this->ios[i];
+
+            arrData32bit[0] = (uint8_t)(data >> 0);
+            arrData32bit[1] = (uint8_t)(data >> 8);
+            arrData32bit[2] = (uint8_t)(data >> 16);
+            arrData32bit[3] = (uint8_t)(data >> 24);
+
+            api.system.flash.set(this->ioOffsets[i], arrData32bit, 4);
+        }
     }
 
     /// @brief Inicializa instância de conexão.

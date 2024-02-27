@@ -5,6 +5,12 @@ class DeviceLora
 {
 
 protected:
+    uint32_t ioOffsets[10] = {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090};
+    uint ios[10]           = {PA15,  PA1,   PA8,   PA9,   PA0,   PB5,   PB4,   PB3,   PA2,   PB12};
+
+    uint32_t timerZoneOffsets[5] = {10100, 10110, 10120, 10130, 10140};
+    uint timers[5]               = {};
+
     int joinMode;
     String appskey;
     String nwkskey;
