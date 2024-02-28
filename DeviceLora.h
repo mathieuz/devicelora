@@ -5,11 +5,23 @@ class DeviceLora
 {
 
 protected:
-    uint32_t ioOffsets[10] = {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090};
-    uint ios[10]           = {PA15,  PA1,   PA8,   PA9,   PA0,   PB5,   PB4,   PB3,   PA2,   PB12};
 
-    uint32_t timerZoneOffsets[5] = {10100, 10110, 10120, 10130, 10140};
-    uint timers[5]               = {};
+    //Matriz com os IOs e os endereços na memória onde serão salvos.
+    uint32_t iosOffsets[2][10] = {
+        {PA15,  PA1,   PA8,   PA9,   PA0,   PB5,   PB4,   PB3,   PA2,   PB12}, //IOs
+        {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090} //Offsets
+    };
+
+    //Matriz com os valores de zonas/timers e os endereços na memória onde serão salvos.
+    uint32_t timersOffsets[2][5] = {
+        {2000,  4000,  6000,  8000,  10000}, //Timers
+        {10100, 10110, 10120, 10130, 10140}, //Offsets
+    };
+
+    //Array que predefine os IOs (na ordem do vetor de ios) a um valor possível de timer.
+    uint32_t iosTimerValues[10] = {2000,   2000,  4000,  8000,  10000, 4000,  2000,  8000,  10000, 10000};
+
+    String iosString[10]        = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
 
     int joinMode;
     String appskey;
@@ -415,6 +427,22 @@ public:
                 Serial.println("");
             }
         }
+    }
+
+    void GetIoTimer(uint32_t timer) {
+        String res = "";
+
+        for (uint i = 0; i < 10; i++) {
+            if (iosTimerValues[i] == timer) {
+                res += this->iosString[i];
+                res += ": ";
+                res += this->iosOffsets[0][i];
+                res += '\n';
+            }
+        }
+
+        Serial.printf("\nIOs associados ao timer %d\n", timer);
+        Serial.print(res);
     }
 
     String GetLastReceivedTextData() {

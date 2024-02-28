@@ -2,14 +2,76 @@
 #include "DeviceLoraABP.h"
 #include "DeviceLoraOTAA.h"
 
-DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C');
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+//Timer handlers
+void timer0 (void* data) {
+    abp.GetIoTimer(2000);
+}
+
+void timer1 (void* data) {
+    abp.GetIoTimer(4000);
+}
+
+void timer2 (void* data) {
+    abp.GetIoTimer(6000);
+}
+
+void timer3 (void* data) {
+    abp.GetIoTimer(8000);
+}
+
+void timer4 (void* data) {
+    abp.GetIoTimer(10000);
+}
 
 void setup() {
     delay(2000);
+
     Serial.begin(115200);
+
+    //Finalizando instância de conexão.
     abp.Setup();
+
+    //Registrando os timer handlers.
+    /*
+    api.system.timer.create(RAK_TIMER_0, (RAK_TIMER_HANDLER)timer0, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_0, 2000, NULL);
+
+    api.system.timer.create(RAK_TIMER_1, (RAK_TIMER_HANDLER)timer1, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_1, 4000, NULL);
+
+    api.system.timer.create(RAK_TIMER_2, (RAK_TIMER_HANDLER)timer2, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_2, 6000, NULL);
+
+    api.system.timer.create(RAK_TIMER_3, (RAK_TIMER_HANDLER)timer3, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_3, 8000, NULL);
+
+    api.system.timer.create(RAK_TIMER_4, (RAK_TIMER_HANDLER)timer4, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_4, 10000, NULL);
+    */
 }
 
 void loop() {
-    Serial.println(abp.GetClass());
+    uint offset = 10140;
+    Serial.printf("Valor lido do endereço %d da memória flash:\n", offset);
+
+    uint8_t arrBufferData[4] = {0};
+    uint32_t data = 0;
+
+    if (api.system.flash.get(offset, arrBufferData, 4)) {
+        data |= arrBufferData[0] << 0;
+        data |= arrBufferData[1] << 8;
+        data |= arrBufferData[2] << 16;
+        data |= arrBufferData[3] << 24;
+
+        Serial.println(data);
+
+        delay(3000);
+
+    } else {
+        Serial.println("Erro ao ler informação da flash.");
+
+    }
 }
