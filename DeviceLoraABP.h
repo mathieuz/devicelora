@@ -52,32 +52,6 @@ public:
         this->bandRegion = this->bandRegion;
         this->channelMask = channelMask;
 
-        //Registrando IOs e timers na memória flash do dispositivo.
-        uint8_t arrData32bit[4];
-
-        //Definindo todos os IOs na memória flash.
-        for (uint32_t i = 0; i < 10; i++) {
-            uint32_t data = this->iosOffsets[0][i]; //Recebe os IOS.
-
-            arrData32bit[0] = (uint8_t)(data >> 0);
-            arrData32bit[1] = (uint8_t)(data >> 8);
-            arrData32bit[2] = (uint8_t)(data >> 16);
-            arrData32bit[3] = (uint8_t)(data >> 24);
-
-            api.system.flash.set(this->iosOffsets[1][i], arrData32bit, 4); //Armazena no offset definido para o IO.
-        }
-
-        //Definindo todas as zonas/timers na memória flash
-        for (uint32_t i = 0; i < 5; i++) {
-            uint32_t data = this->timersOffsets[0][i]; //Recebe os valores de timer.
-
-            arrData32bit[0] = (uint8_t)(data >> 0);
-            arrData32bit[1] = (uint8_t)(data >> 8);
-            arrData32bit[2] = (uint8_t)(data >> 16);
-            arrData32bit[3] = (uint8_t)(data >> 24);
-
-            api.system.flash.set(this->timersOffsets[1][i], arrData32bit, 4); //Armazena no offset definido para o valor de timer.
-        }
     }
 
     /// @brief Inicializa instância de conexão.
@@ -100,6 +74,25 @@ public:
         api.lorawan.registerSendCallback(SendCallback);
         api.lorawan.registerJoinCallback(JoinCallback);
         */
+    }
+
+    /// @brief Inicializa timers/zonas na memória flash.
+    void SetupZoneFlash(uint32_t timersIos[10]) {
+
+        //Registrando IOs e timers na memória flash do dispositivo.
+        uint8_t arrData32bit[4];
+
+        //Definindo todas as zonas/timers na memória flash
+        for (uint32_t i = 0; i < 10; i++) {
+            uint32_t data = timersIos[i]; //Recebe os valores de timer.
+
+            arrData32bit[0] = (uint8_t)(data >> 0);
+            arrData32bit[1] = (uint8_t)(data >> 8);
+            arrData32bit[2] = (uint8_t)(data >> 16);
+            arrData32bit[3] = (uint8_t)(data >> 24);
+
+            api.system.flash.set(this->timersIosOffsets[i], arrData32bit, 4); //Armazena no offset definido para o valor de timer.
+        }
     }
 
     /// @brief Define Appskey.

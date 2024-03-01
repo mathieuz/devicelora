@@ -7,21 +7,14 @@ class DeviceLora
 protected:
 
     //Matriz com os IOs e os endereços na memória onde serão salvos.
-    uint32_t iosOffsets[2][10] = {
-        {PA15,  PA1,   PA8,   PA9,   PA0,   PB5,   PB4,   PB3,   PA2,   PB12}, //IOs
-        {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090} //Offsets
-    };
+                              //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t iosOffsets[10] = {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090};
 
     //Matriz com os valores de zonas/timers e os endereços na memória onde serão salvos.
-    uint32_t timersOffsets[2][5] = {
-        {2000,  4000,  6000,  8000,  10000}, //Timers
-        {10100, 10110, 10120, 10130, 10140}, //Offsets
-    };
+                                    //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t timersIosOffsets[10] = {10100, 10110, 10120, 10130, 10140, 10150, 10160, 10170, 10180, 10190};
 
-    //Array que predefine os IOs (na ordem do vetor de ios) a um valor possível de timer.
-    uint32_t iosTimerValues[10] = {2000,   2000,  4000,  8000,  10000, 4000,  2000,  8000,  10000, 10000};
-
-    String iosString[10]        = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
+    String iosString[10] = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
 
     int joinMode;
     String appskey;
@@ -429,19 +422,48 @@ public:
         }
     }
 
-    void GetIoTimer(uint32_t timer) {
+    /// @brief Inicializa estado lógico das IOs na memória flash.
+    void SetupIoModeFlash(uint32_t iosMode[10]) {
+
+        //Registrando IOs do  na memória flash do dispositivo.
+        uint8_t arrData32bit[4];
+
+        //Definindo todos os IOs na memória flash.
+        for (uint32_t i = 0; i < 10; i++) {
+            uint32_t data = iosMode[i]; //Recebe os estados lógicos.
+
+            arrData32bit[0] = (uint8_t)(data >> 0);
+            arrData32bit[1] = (uint8_t)(data >> 8);
+            arrData32bit[2] = (uint8_t)(data >> 16);
+            arrData32bit[3] = (uint8_t)(data >> 24);
+
+            api.system.flash.set(this->iosOffsets[i], arrData32bit, 4); //Armazena no offset definido para o IO.
+        }
+    }
+
+    void GetIoMode() {
+
         String res = "";
+        uint8_t bufferData[4] = {0};
+        uint32_t data = 0;
 
         for (uint i = 0; i < 10; i++) {
-            if (iosTimerValues[i] == timer) {
+            if (api.system.flash.get(this->iosOffsets[i], bufferData, 4)) {
+                data |= bufferData[0] << 0;
+                data |= bufferData[1] << 8;
+                data |= bufferData[2] << 16;
+                data |= bufferData[3] << 24;
+
                 res += this->iosString[i];
                 res += ": ";
-                res += this->iosOffsets[0][i];
+                res += (String)data;
                 res += '\n';
+
+                data = 0;
             }
         }
 
-        Serial.printf("\nIOs associados ao timer %d\n", timer);
+        Serial.printf("\nEstado lógico dos IOs: %d\n");
         Serial.print(res);
     }
 

@@ -6,6 +6,7 @@
 DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
 
 //Timer handlers
+/*
 void timer0 (void* data) {
     abp.GetIoTimer(2000);
 }
@@ -25,14 +26,19 @@ void timer3 (void* data) {
 void timer4 (void* data) {
     abp.GetIoTimer(10000);
 }
+*/
 
 void setup() {
-    delay(2000);
+    delay(4000);
 
     Serial.begin(115200);
 
     //Finalizando instância de conexão.
     abp.Setup();
+
+    //Definindo estado lógico dos IOs na memória flash.
+    uint32_t iosMode[10] = {0, 1, 2, 1, 0, 1, 2, 1, 0, 1};
+    abp.SetupIoModeFlash(iosMode);
 
     //Registrando os timer handlers.
     /*
@@ -51,10 +57,12 @@ void setup() {
     api.system.timer.create(RAK_TIMER_4, (RAK_TIMER_HANDLER)timer4, RAK_TIMER_ONESHOT);
     api.system.timer.start(RAK_TIMER_4, 10000, NULL);
     */
+
 }
 
 void loop() {
-    uint offset = 10140;
+    /*
+    uint offset = 10060;
     Serial.printf("Valor lido do endereço %d da memória flash:\n", offset);
 
     uint8_t arrBufferData[4] = {0};
@@ -74,4 +82,8 @@ void loop() {
         Serial.println("Erro ao ler informação da flash.");
 
     }
+    */
+
+    abp.GetIoMode();
+    delay(5000);
 }
