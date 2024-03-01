@@ -441,6 +441,25 @@ public:
         }
     }
 
+    /// @brief Inicializa timers/zonas na memória flash.
+    void SetupTimersFlash(uint32_t timersIos[10]) {
+
+        //Registrando IOs e timers na memória flash do dispositivo.
+        uint8_t arrData32bit[4];
+
+        //Definindo todas as zonas/timers na memória flash
+        for (uint32_t i = 0; i < 10; i++) {
+            uint32_t data = timersIos[i]; //Recebe os valores de timer.
+
+            arrData32bit[0] = (uint8_t)(data >> 0);
+            arrData32bit[1] = (uint8_t)(data >> 8);
+            arrData32bit[2] = (uint8_t)(data >> 16);
+            arrData32bit[3] = (uint8_t)(data >> 24);
+
+            api.system.flash.set(this->timersIosOffsets[i], arrData32bit, 4); //Armazena no offset definido para o valor de timer.
+        }
+    }
+
     void GetIoMode() {
 
         String res = "";
@@ -448,7 +467,7 @@ public:
         uint32_t data = 0;
 
         for (uint i = 0; i < 10; i++) {
-            if (api.system.flash.get(this->iosOffsets[i], bufferData, 4)) {
+            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
                 data |= bufferData[0] << 0;
                 data |= bufferData[1] << 8;
                 data |= bufferData[2] << 16;
@@ -464,6 +483,32 @@ public:
         }
 
         Serial.printf("\nEstado lógico dos IOs: %d\n");
+        Serial.print(res);
+    }
+
+    void GetIoTimer() {
+
+        String res = "";
+        uint8_t bufferData[4] = {0};
+        uint32_t data = 0;
+
+        for (uint i = 0; i < 10; i++) {
+            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
+                data |= bufferData[0] << 0;
+                data |= bufferData[1] << 8;
+                data |= bufferData[2] << 16;
+                data |= bufferData[3] << 24;
+
+                res += this->iosString[i];
+                res += ": ";
+                res += (String)data;
+                res += '\n';
+
+                data = 0;
+            }
+        }
+
+        Serial.printf("\nTimers/zonas dos IOs: %d\n");
         Serial.print(res);
     }
 

@@ -37,8 +37,14 @@ void setup() {
     abp.Setup();
 
     //Definindo estado lógico dos IOs na memória flash.
-    uint32_t iosMode[10] = {0, 1, 2, 1, 0, 1, 2, 1, 0, 1};
+    uint32_t iosMode[10]   = {0, 1, 2, 1, 0, 1, 2, 1, 0, 1};
+
+    //Definindo zonas/timers dos IOs na memória flash.
+    uint32_t timersIos[10] = {0, 0, 1, 2, 3, 4, 1, 1, 0, 2};
+
+    //Gravando informações na flash.
     abp.SetupIoModeFlash(iosMode);
+    abp.SetupTimersFlash(timersIos);
 
     //Registrando os timer handlers.
     /*
@@ -84,6 +90,6 @@ void loop() {
     }
     */
 
-    abp.GetIoMode();
+    abp.GetIoTimer();
     delay(5000);
 }
