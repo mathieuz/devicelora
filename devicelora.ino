@@ -6,27 +6,25 @@
 DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
 
 //Timer handlers
-/*
 void timer0 (void* data) {
-    abp.GetIoTimer(2000);
+    abp.GetIoConfig(0);
 }
 
 void timer1 (void* data) {
-    abp.GetIoTimer(4000);
+    abp.GetIoConfig(1);
 }
 
 void timer2 (void* data) {
-    abp.GetIoTimer(6000);
+    abp.GetIoConfig(2);
 }
 
 void timer3 (void* data) {
-    abp.GetIoTimer(8000);
+    abp.GetIoConfig(3);
 }
 
 void timer4 (void* data) {
-    abp.GetIoTimer(10000);
+    abp.GetIoConfig(4);
 }
-*/
 
 void setup() {
     delay(4000);
@@ -37,17 +35,18 @@ void setup() {
     abp.Setup();
 
     //Definindo estado lógico dos IOs na memória flash.
-    uint32_t iosMode[10]   = {0, 1, 2, 1, 0, 1, 2, 1, 0, 1};
+                              //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t iosMode[10]   = {0,      1,     2,     1,     0,     1,     2,     1,     0,     1};
 
     //Definindo zonas/timers dos IOs na memória flash.
-    uint32_t timersIos[10] = {0, 0, 1, 2, 3, 4, 1, 1, 0, 2};
+                              //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t timersIos[10] = {0,      0,     1,     2,     3,     4,     1,     1,     0,     2};
 
     //Gravando informações na flash.
     abp.SetupIoModeFlash(iosMode);
     abp.SetupTimersFlash(timersIos);
 
     //Registrando os timer handlers.
-    /*
     api.system.timer.create(RAK_TIMER_0, (RAK_TIMER_HANDLER)timer0, RAK_TIMER_ONESHOT);
     api.system.timer.start(RAK_TIMER_0, 2000, NULL);
 
@@ -62,7 +61,6 @@ void setup() {
 
     api.system.timer.create(RAK_TIMER_4, (RAK_TIMER_HANDLER)timer4, RAK_TIMER_ONESHOT);
     api.system.timer.start(RAK_TIMER_4, 10000, NULL);
-    */
 
 }
 
@@ -90,6 +88,4 @@ void loop() {
     }
     */
 
-    abp.GetIoTimer();
-    delay(5000);
 }

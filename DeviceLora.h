@@ -460,7 +460,7 @@ public:
         }
     }
 
-    void GetIoMode() {
+    void GetIosMode() {
 
         String res = "";
         uint8_t bufferData[4] = {0};
@@ -482,11 +482,11 @@ public:
             }
         }
 
-        Serial.printf("\nEstado lógico dos IOs: %d\n");
+        Serial.printf("\nEstado lógico dos IOs:");
         Serial.print(res);
     }
 
-    void GetIoTimer() {
+    void GetIosTimer() {
 
         String res = "";
         uint8_t bufferData[4] = {0};
@@ -508,7 +508,36 @@ public:
             }
         }
 
-        Serial.printf("\nTimers/zonas dos IOs: %d\n");
+        Serial.println("\nTimers/zonas dos IOs:");
+        Serial.print(res);
+    }
+
+    void GetIoConfig(uint32_t timerId) {
+
+        String res = "";
+        uint8_t bufferData[4] = {0};
+        uint32_t data = 0;
+
+        //Recuperando o timer id de cada offset de zona.
+        for (uint i = 0; i < 10; i++) {
+            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
+                data |= bufferData[0] << 0;
+                data |= bufferData[1] << 8;
+                data |= bufferData[2] << 16;
+                data |= bufferData[3] << 24;
+
+                //Se o timerid recuperado da flash for igual ao timerid da função do handler,
+                //retorna a string da IO associada ao timerid na mesma posição dentro do array.
+                if (data == timerId) {
+                    res += this->iosString[i];
+                    res += '\n';
+                }
+
+                data = 0;
+            }
+        }
+
+        Serial.printf("\nIOs associados ao Timer ID %d:\n", timerId);
         Serial.print(res);
     }
 
