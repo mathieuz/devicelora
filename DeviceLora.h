@@ -448,7 +448,7 @@ public:
     }
 
     /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
-    void SetupZonesFlash(uint8_t ioZones[10]) {
+    void SetupIosZonesFlash(uint8_t ioZones[10]) {
         api.system.flash.set(10010, ioZones, 10);
     }
 

@@ -48,7 +48,7 @@ void setup() {
 
     //Gravando informações na flash.
     abp.SetupIosModeFlash(iosMode);
-    abp.SetupZonesFlash(iosZones);
+    abp.SetupIosZonesFlash(iosZones);
 
     //Registrando os timer handlers.
     /*
