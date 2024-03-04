@@ -40,11 +40,11 @@ void setup() {
 
     //Definindo estado lógico dos IOs na memória flash.
                             //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint8_t iosMode[10]  = {0x02,   0x02,  0x01,  0x01,  0x00,  0x00,  0x01,  0x01,  0x02,  0x02};
+    uint8_t iosMode[10]  = {0x00,   0x00,  0x00,  0x01,  0x01,  0x01,  0x02,  0x02,  0x02,  0x00};
 
     //Definindo zonas/timers dos IOs na memória flash.
                             //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint8_t iosZones[10] = {0x01,   0x01,  0x01,  0x02,  0x01,  0x01,  0x01,  0x04,  0x03,  0x00};
+    uint8_t iosZones[10] = {0x00,   0x01,  0x02,  0x03,  0x04,  0x03,  0x02,  0x01,  0x00,  0x00};
 
     //Gravando informações na flash.
     abp.SetupIosModeFlash(iosMode);
@@ -71,36 +71,6 @@ void setup() {
 }
 
 void loop() {
-    /*
-    uint offset = 10000;
-    Serial.printf("Valor lido do endereço %d da memória flash:\n", offset);
-
-    uint8_t arrBufferData[10] = {0};
-    uint32_t data = 0;
-
-    if (api.system.flash.get(offset, arrBufferData, 10)) {
-        
-        data |= arrBufferData[0] << 0;
-        data |= arrBufferData[1] << 8;
-        data |= arrBufferData[2] << 16;
-        data |= arrBufferData[3] << 24;
-
-        Serial.println(data);
-
-        for (uint i = 0; i < 10; i++) {
-            Serial.print(arrBufferData[i], HEX);
-        }
-
-        Serial.println();
-
-        delay(3000);
-
-    } else {
-        Serial.println("Erro ao ler informação da flash.");
-
-    }
-    */
-
-    abp.GetIosZones();
+    abp.GetIosModes();
     delay(2000);
 } 
