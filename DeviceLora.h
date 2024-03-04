@@ -422,93 +422,69 @@ public:
         }
     }
 
-    /// @brief Inicializa estado lógico das IOs na memória flash.
-    void SetupIoModeFlash(uint32_t iosMode[10]) {
+    /// @brief Aguarda comando serial para registrar informações na memória flash.
+    void SetupFlash() {
+        uint tempoResposta = millis();
 
-        //Registrando IOs do  na memória flash do dispositivo.
-        uint8_t arrData32bit[4];
+        while ((millis() - tempoResposta) < 5000) {
+            if (Serial.available() > 0) {
 
-        //Definindo todos os IOs na memória flash.
-        for (uint32_t i = 0; i < 10; i++) {
-            uint32_t data = iosMode[i]; //Recebe os estados lógicos.
+                uint8_t buff[3];
+                Serial.readBytes(buff, 3);
 
-            arrData32bit[0] = (uint8_t)(data >> 0);
-            arrData32bit[1] = (uint8_t)(data >> 8);
-            arrData32bit[2] = (uint8_t)(data >> 16);
-            arrData32bit[3] = (uint8_t)(data >> 24);
+                Serial.println("Recebido da Serial:");
+                for (uint i = 0; i < 3; i++) {
+                    Serial.println((char)buff[i]);
+                }
 
-            api.system.flash.set(this->iosOffsets[i], arrData32bit, 4); //Armazena no offset definido para o IO.
+                Serial.println();
+            }
         }
     }
 
-    /// @brief Inicializa timers/zonas na memória flash.
-    void SetupTimersFlash(uint32_t timersIos[10]) {
-
-        //Registrando IOs e timers na memória flash do dispositivo.
-        uint8_t arrData32bit[4];
-
-        //Definindo todas as zonas/timers na memória flash
-        for (uint32_t i = 0; i < 10; i++) {
-            uint32_t data = timersIos[i]; //Recebe os valores de timer.
-
-            arrData32bit[0] = (uint8_t)(data >> 0);
-            arrData32bit[1] = (uint8_t)(data >> 8);
-            arrData32bit[2] = (uint8_t)(data >> 16);
-            arrData32bit[3] = (uint8_t)(data >> 24);
-
-            api.system.flash.set(this->timersIosOffsets[i], arrData32bit, 4); //Armazena no offset definido para o valor de timer.
-        }
+    /// @brief Inicializa estado lógico das IOs na memória flash. Offsets do 10000 ao 10009 (seguindo a ordem dos IOs).
+    void SetupIosModeFlash(uint8_t iosMode[10]) {
+        api.system.flash.set(10000, iosMode, 10);
     }
 
-    void GetIosMode() {
+    /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
+    void SetupZonesFlash(uint8_t ioZones[10]) {
+        api.system.flash.set(10010, ioZones, 10);
+    }
 
+    /// @brief Exibe os estados lógicos dos pinos IOs.
+    void GetIosModes() {
         String res = "";
-        uint8_t bufferData[4] = {0};
-        uint32_t data = 0;
+        uint8_t bufferData[10] = {0};
 
-        for (uint i = 0; i < 10; i++) {
-            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
-                data |= bufferData[0] << 0;
-                data |= bufferData[1] << 8;
-                data |= bufferData[2] << 16;
-                data |= bufferData[3] << 24;
-
-                res += this->iosString[i];
+        if (api.system.flash.get(10000, bufferData, 10)) {
+            for (uint i = 0; i < 10; i++) {
+                res += iosString[i];
                 res += ": ";
-                res += (String)data;
-                res += '\n';
-
-                data = 0;
+                res += (String)bufferData[i];
+                res += "\n";
             }
         }
 
-        Serial.printf("\nEstado lógico dos IOs:");
+        Serial.println("\nEstado lógico dos IOs:");
         Serial.print(res);
     }
 
-    void GetIosTimer() {
-
+    /// @brief Exibe as zonas definidas dos pinos IOs.
+    void GetIosZones() {
         String res = "";
-        uint8_t bufferData[4] = {0};
-        uint32_t data = 0;
+        uint8_t bufferData[10] = {0};
 
-        for (uint i = 0; i < 10; i++) {
-            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
-                data |= bufferData[0] << 0;
-                data |= bufferData[1] << 8;
-                data |= bufferData[2] << 16;
-                data |= bufferData[3] << 24;
-
-                res += this->iosString[i];
+        if (api.system.flash.get(10010, bufferData, 10)) {
+            for (uint i = 0; i < 10; i++) {
+                res += iosString[i];
                 res += ": ";
-                res += (String)data;
-                res += '\n';
-
-                data = 0;
+                res += (String)bufferData[i];
+                res += "\n";
             }
         }
 
-        Serial.println("\nTimers/zonas dos IOs:");
+        Serial.println("\nZonas definidas nos IOs:");
         Serial.print(res);
     }
 
