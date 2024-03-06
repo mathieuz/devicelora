@@ -241,6 +241,52 @@ protected:
 
     }
 
+    /// @brief Inicializa estado lógico das IOs na memória flash. Offsets do 10000 ao 10009 (seguindo a ordem dos IOs).
+    void SetupIosModesFlash(uint8_t iosModes[10]) {
+        api.system.flash.set(10000, iosModes, 10);
+    }
+
+    /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
+    void SetupIosZonesFlash(uint8_t iosZones[10]) {
+        api.system.flash.set(10010, iosZones, 10);
+    }
+
+    uint16_t calcCRC(uint8_t buffer[], uint8_t length) {
+        uint16_t crc = 0xFFFF;
+
+        for (uint pos = 0; pos < length; pos++) {
+
+            crc ^= (uint16_t)buffer[pos];
+            
+            for (uint16_t i = 8; i != 0; i--) {
+
+                if ((crc & 0x0001) != 0) {
+                    crc >>= 1;
+                    crc ^= 0xA001;
+
+                } else {
+                    crc >>= 1;
+
+                }
+            }
+        }
+
+        return crc;
+
+    }
+
+    uint8_t getCRCHigh(uint8_t buffer[], uint8_t length)
+    {
+        uint16_t crc = this->calcCRC(buffer, length);
+        return (uint8_t)(crc >> 8);
+    }
+
+    uint8_t getCRCLow(uint8_t buffer[], uint8_t length)
+    {
+        uint16_t crc = this->calcCRC(buffer, length);
+        return (uint8_t)(crc & 0x00FF);
+    }
+
 public:
     /// @brief Define o modo de conexão.
     /// @param mode Modo de conexão (0 = ABP, 1 = OTAA)
@@ -422,34 +468,68 @@ public:
         }
     }
 
-    /// @brief Aguarda comando serial para registrar informações na memória flash.
+    /// @brief Aguarda os bytes de configuração dos IOs para registrar na memória flash.
     void SetupFlash() {
         uint tempoResposta = millis();
 
         while ((millis() - tempoResposta) < 5000) {
             if (Serial.available() > 0) {
 
-                uint8_t buff[3];
-                Serial.readBytes(buff, 3);
+                //São 10 IOs no total. Cada IO, em ordem, recebe uma configuração de modo e zona. 20 bytes
+                //devem ser recebidos + 2 bytes referentes ao CRC. Total de 22 bytes.
+                uint8_t bufferIosConfig[22];
+                Serial.readBytes(bufferIosConfig, 22);
 
-                Serial.println("Recebido da Serial:");
-                for (uint i = 0; i < 3; i++) {
-                    Serial.println((char)buff[i]);
+                //Recuperando o CRC recebido do buffer.
+                uint8_t crcResHigh = bufferIosConfig[20];
+                uint8_t crcResLow = bufferIosConfig[21];
+                uint16_t crcRecebido = (uint16_t)((crcResHigh << 8) + crcResLow);
+
+                //Recebe apenas as configurações dos IOs.
+                uint8_t iosConfig[20];
+                for (uint i = 0; i < 20; i++) {
+                    iosConfig[i] = bufferIosConfig[i];
                 }
 
-                Serial.println();
+                //Recalculando o CRC.
+                uint16_t crcCalculado = this->calcCRC(iosConfig, 20);
+
+                //Comparando se o CRC recalculado e o CRC recebido do buffer são iguais.
+                if (crcCalculado == crcRecebido) {
+
+                    //Arrays com as configurações de modo e zona das IOs.
+                    uint8_t iosModes[10];
+                    uint8_t iosZones[10];
+
+                    //Preenchendo as arrays.
+                    
+                    uint8_t indexCount = 0;
+                    for (uint i = 0; i < 10; i++)
+                    {
+                        iosModes[indexCount] = iosConfig[i];
+                        indexCount++;
+                    }
+
+                    indexCount = 0;
+
+                    for (uint i = 10; i < 20; i++)
+                    {
+                        iosZones[indexCount] = iosConfig[i];
+                        indexCount++;
+                    }
+
+                    //Gravando modos e zonas dos IOs na flash.
+                    this->SetupIosModesFlash(iosModes);
+                    this->SetupIosZonesFlash(iosZones);
+
+                    break;
+
+                } else {
+                    Serial.println("O CRC calculado não condiz com o CRC recebido.");
+
+                }
             }
         }
-    }
-
-    /// @brief Inicializa estado lógico das IOs na memória flash. Offsets do 10000 ao 10009 (seguindo a ordem dos IOs).
-    void SetupIosModeFlash(uint8_t iosMode[10]) {
-        api.system.flash.set(10000, iosMode, 10);
-    }
-
-    /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
-    void SetupIosZonesFlash(uint8_t ioZones[10]) {
-        api.system.flash.set(10010, ioZones, 10);
     }
 
     /// @brief Exibe os estados lógicos dos pinos IOs.

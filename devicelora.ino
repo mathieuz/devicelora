@@ -36,19 +36,8 @@ void setup() {
     //Finalizando instância de conexão.
     abp.Setup();
 
+    //Aguarda os bytes das configurações dos IOs.
     abp.SetupFlash();
-
-    //Definindo estado lógico dos IOs na memória flash.
-                            //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint8_t iosMode[10]  = {0x00,   0x00,  0x00,  0x01,  0x01,  0x01,  0x02,  0x02,  0x02,  0x00};
-
-    //Definindo zonas/timers dos IOs na memória flash.
-                            //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint8_t iosZones[10] = {0x00,   0x01,  0x02,  0x03,  0x04,  0x03,  0x02,  0x01,  0x00,  0x00};
-
-    //Gravando informações na flash.
-    abp.SetupIosModeFlash(iosMode);
-    abp.SetupIosZonesFlash(iosZones);
 
     //Registrando os timer handlers.
     /*
@@ -73,4 +62,6 @@ void setup() {
 void loop() {
     abp.GetIosModes();
     delay(2000);
+    abp.GetIosZones();
+    delay(8000);
 } 
