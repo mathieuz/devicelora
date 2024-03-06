@@ -568,33 +568,57 @@ public:
         Serial.print(res);
     }
 
-    void GetIoConfig(uint32_t timerId) {
+    void GetIoConfig(uint32_t zone) {
 
         String res = "";
-        uint8_t bufferData[4] = {0};
-        uint32_t data = 0;
+        uint8_t bufferData[20] = {0};
 
-        //Recuperando o timer id de cada offset de zona.
-        for (uint i = 0; i < 10; i++) {
-            if (api.system.flash.get(this->timersIosOffsets[i], bufferData, 4)) {
-                data |= bufferData[0] << 0;
-                data |= bufferData[1] << 8;
-                data |= bufferData[2] << 16;
-                data |= bufferData[3] << 24;
+        //Lendo os 20 endereços da memória associada aos IOs (modos e zonas).
+        if (api.system.flash.get(10000, bufferData, 20)) {
 
-                //Se o timerid recuperado da flash for igual ao timerid da função do handler,
-                //retorna a string da IO associada ao timerid na mesma posição dentro do array.
-                if (data == timerId) {
+            //Separando os valores de configuração em duas arrays diferentes (modos e zonas).
+            uint8_t iosModes[10];
+            uint8_t iosZones[10];
+
+            uint8_t indexCount = 0;
+            for (uint i = 0; i < 10; i++)
+            {
+                iosModes[indexCount] = bufferData[i];
+                indexCount++;
+            }
+
+            indexCount = 0;
+
+            for (uint i = 10; i < 20; i++)
+            {
+                iosZones[indexCount] = bufferData[i];
+                indexCount++;
+            }
+
+            //Verificando se a zona definida no espaço da memória e o modo é referente ao IO. Se sim, retorna essas informações no handler.
+            for (uint i = 0; i < 10; i++) {
+                if (iosZones[i] == zone) {
                     res += this->iosString[i];
-                    res += '\n';
-                }
 
-                data = 0;
+                    if (iosModes[i] == 0) {
+                        res += " (Entrada Digital)";
+
+                    } else if (iosModes[i] == 1) {
+                        res += " (Saida Digital)";
+
+                    } else {
+                        res += " (Entrada Analogica)";
+
+                    }
+
+                    res += "\n";
+                }
             }
         }
 
-        Serial.printf("\nIOs associados ao Timer ID %d:\n", timerId);
+        Serial.printf("\nIOs associados a zona/timer ID %d:\n", zone);
         Serial.print(res);
+
     }
 
     String GetLastReceivedTextData() {
