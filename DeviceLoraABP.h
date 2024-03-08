@@ -51,6 +51,7 @@ public:
         this->classMode = classMode;
         this->bandRegion = this->bandRegion;
         this->channelMask = channelMask;
+
     }
 
     /// @brief Inicializa instância de conexão.

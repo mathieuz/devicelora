@@ -5,6 +5,17 @@ class DeviceLora
 {
 
 protected:
+
+    //Matriz com os IOs e os endereços na memória onde serão salvos.
+                              //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t iosOffsets[10] = {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090};
+
+    //Matriz com os valores de zonas/timers e os endereços na memória onde serão salvos.
+                                    //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
+    uint32_t timersIosOffsets[10] = {10100, 10110, 10120, 10130, 10140, 10150, 10160, 10170, 10180, 10190};
+
+    String iosString[10] = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
+
     int joinMode;
     String appskey;
     String nwkskey;
@@ -230,6 +241,52 @@ protected:
 
     }
 
+    /// @brief Inicializa estado lógico das IOs na memória flash. Offsets do 10000 ao 10009 (seguindo a ordem dos IOs).
+    void SetupIosModesFlash(uint8_t iosModes[10]) {
+        api.system.flash.set(10000, iosModes, 10);
+    }
+
+    /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
+    void SetupIosZonesFlash(uint8_t iosZones[10]) {
+        api.system.flash.set(10010, iosZones, 10);
+    }
+
+    uint16_t calcCRC(uint8_t buffer[], uint8_t length) {
+        uint16_t crc = 0xFFFF;
+
+        for (uint pos = 0; pos < length; pos++) {
+
+            crc ^= (uint16_t)buffer[pos];
+            
+            for (uint16_t i = 8; i != 0; i--) {
+
+                if ((crc & 0x0001) != 0) {
+                    crc >>= 1;
+                    crc ^= 0xA001;
+
+                } else {
+                    crc >>= 1;
+
+                }
+            }
+        }
+
+        return crc;
+
+    }
+
+    uint8_t getCRCHigh(uint8_t buffer[], uint8_t length)
+    {
+        uint16_t crc = this->calcCRC(buffer, length);
+        return (uint8_t)(crc >> 8);
+    }
+
+    uint8_t getCRCLow(uint8_t buffer[], uint8_t length)
+    {
+        uint16_t crc = this->calcCRC(buffer, length);
+        return (uint8_t)(crc & 0x00FF);
+    }
+
 public:
     /// @brief Define o modo de conexão.
     /// @param mode Modo de conexão (0 = ABP, 1 = OTAA)
@@ -409,6 +466,159 @@ public:
                 Serial.println("");
             }
         }
+    }
+
+    /// @brief Aguarda os bytes de configuração dos IOs para registrar na memória flash.
+    void SetupFlash() {
+        uint tempoResposta = millis();
+
+        while ((millis() - tempoResposta) < 5000) {
+            if (Serial.available() > 0) {
+
+                //São 10 IOs no total. Cada IO, em ordem, recebe uma configuração de modo e zona. 20 bytes
+                //devem ser recebidos + 2 bytes referentes ao CRC. Total de 22 bytes.
+                uint8_t bufferIosConfig[22];
+                Serial.readBytes(bufferIosConfig, 22);
+
+                //Recuperando o CRC recebido do buffer.
+                uint8_t crcResHigh = bufferIosConfig[20];
+                uint8_t crcResLow = bufferIosConfig[21];
+                uint16_t crcRecebido = (uint16_t)((crcResHigh << 8) + crcResLow);
+
+                //Recebe apenas as configurações dos IOs.
+                uint8_t iosConfig[20];
+                for (uint i = 0; i < 20; i++) {
+                    iosConfig[i] = bufferIosConfig[i];
+                }
+
+                //Recalculando o CRC.
+                uint16_t crcCalculado = this->calcCRC(iosConfig, 20);
+
+                //Comparando se o CRC recalculado e o CRC recebido do buffer são iguais.
+                if (crcCalculado == crcRecebido) {
+
+                    //Arrays com as configurações de modo e zona das IOs.
+                    uint8_t iosModes[10];
+                    uint8_t iosZones[10];
+
+                    //Preenchendo as arrays.
+                    
+                    uint8_t indexCount = 0;
+                    for (uint i = 0; i < 10; i++)
+                    {
+                        iosModes[indexCount] = iosConfig[i];
+                        indexCount++;
+                    }
+
+                    indexCount = 0;
+
+                    for (uint i = 10; i < 20; i++)
+                    {
+                        iosZones[indexCount] = iosConfig[i];
+                        indexCount++;
+                    }
+
+                    //Gravando modos e zonas dos IOs na flash.
+                    this->SetupIosModesFlash(iosModes);
+                    this->SetupIosZonesFlash(iosZones);
+
+                    break;
+
+                } else {
+                    Serial.println("O CRC calculado não condiz com o CRC recebido.");
+
+                }
+            }
+        }
+    }
+
+    /// @brief Exibe os estados lógicos dos pinos IOs.
+    void GetIosModes() {
+        String res = "";
+        uint8_t bufferData[10] = {0};
+
+        if (api.system.flash.get(10000, bufferData, 10)) {
+            for (uint i = 0; i < 10; i++) {
+                res += iosString[i];
+                res += ": ";
+                res += (String)bufferData[i];
+                res += "\n";
+            }
+        }
+
+        Serial.println("\nEstado lógico dos IOs:");
+        Serial.print(res);
+    }
+
+    /// @brief Exibe as zonas definidas dos pinos IOs.
+    void GetIosZones() {
+        String res = "";
+        uint8_t bufferData[10] = {0};
+
+        if (api.system.flash.get(10010, bufferData, 10)) {
+            for (uint i = 0; i < 10; i++) {
+                res += iosString[i];
+                res += ": ";
+                res += (String)bufferData[i];
+                res += "\n";
+            }
+        }
+
+        Serial.println("\nZonas definidas nos IOs:");
+        Serial.print(res);
+    }
+
+    void GetIoConfig(uint32_t zone) {
+
+        String res = "";
+        uint8_t bufferData[20] = {0};
+
+        //Lendo os 20 endereços da memória associada aos IOs (modos e zonas).
+        if (api.system.flash.get(10000, bufferData, 20)) {
+
+            //Separando os valores de configuração em duas arrays diferentes (modos e zonas).
+            uint8_t iosModes[10];
+            uint8_t iosZones[10];
+
+            uint8_t indexCount = 0;
+            for (uint i = 0; i < 10; i++)
+            {
+                iosModes[indexCount] = bufferData[i];
+                indexCount++;
+            }
+
+            indexCount = 0;
+
+            for (uint i = 10; i < 20; i++)
+            {
+                iosZones[indexCount] = bufferData[i];
+                indexCount++;
+            }
+
+            //Verificando se a zona definida no espaço da memória e o modo é referente ao IO. Se sim, retorna essas informações no handler.
+            for (uint i = 0; i < 10; i++) {
+                if (iosZones[i] == zone) {
+                    res += this->iosString[i];
+
+                    if (iosModes[i] == 0) {
+                        res += " (Entrada Digital)";
+
+                    } else if (iosModes[i] == 1) {
+                        res += " (Saida Digital)";
+
+                    } else {
+                        res += " (Entrada Analogica)";
+
+                    }
+
+                    res += "\n";
+                }
+            }
+        }
+
+        Serial.printf("\nIOs associados a zona/timer ID %d:\n", zone);
+        Serial.print(res);
+
     }
 
     String GetLastReceivedTextData() {
