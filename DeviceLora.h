@@ -6,14 +6,7 @@ class DeviceLora
 
 protected:
 
-    //Matriz com os IOs e os endereços na memória onde serão salvos.
-                              //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint32_t iosOffsets[10] = {10000, 10010, 10020, 10030, 10040, 10050, 10060, 10070, 10080, 10090};
-
-    //Matriz com os valores de zonas/timers e os endereços na memória onde serão salvos.
-                                    //PA15  //PA1  //PA8  //PA9  //PA0  //PB5  //PB4  //PB3  //PA2  //PB12
-    uint32_t timersIosOffsets[10] = {10100, 10110, 10120, 10130, 10140, 10150, 10160, 10170, 10180, 10190};
-
+    //String com as IOs. Essa é ordem de configuração dos modos e zonas dos IOs na memória flash do device.
     String iosString[10] = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
 
     int joinMode;
@@ -251,6 +244,12 @@ protected:
         api.system.flash.set(10010, iosZones, 10);
     }
 
+    /// @brief Inicializa modos, zonas e timers dos IOs na memória flash. Offsets do 10000 ao 10030 (seguindo a ordem dos IOs).
+    /// @param iosConfig 
+    void SetupIosConfig(uint8_t iosConfig[30]) {
+        api.system.flash.set(10000, iosConfig, 30);
+    }
+
     uint16_t calcCRC(uint8_t buffer[], uint8_t length) {
         uint16_t crc = 0xFFFF;
 
@@ -475,52 +474,30 @@ public:
         while ((millis() - tempoResposta) < 5000) {
             if (Serial.available() > 0) {
 
-                //São 10 IOs no total. Cada IO, em ordem, recebe uma configuração de modo e zona. 20 bytes
-                //devem ser recebidos + 2 bytes referentes ao CRC. Total de 22 bytes.
-                uint8_t bufferIosConfig[22];
-                Serial.readBytes(bufferIosConfig, 22);
-
-                //Recuperando o CRC recebido do buffer.
-                uint8_t crcResHigh = bufferIosConfig[20];
-                uint8_t crcResLow = bufferIosConfig[21];
-                uint16_t crcRecebido = (uint16_t)((crcResHigh << 8) + crcResLow);
+                //São 10 IOs no total. Cada IO, em ordem, recebe uma configuração de modo, zona e valor de timer. 30 bytes
+                //devem ser recebidos + 2 bytes referentes ao CRC. Total de 32 bytes.
+                uint8_t bufferIosConfig[32];
+                Serial.readBytes(bufferIosConfig, 32);
 
                 //Recebe apenas as configurações dos IOs.
-                uint8_t iosConfig[20];
-                for (uint i = 0; i < 20; i++) {
+                uint8_t iosConfig[30];
+                for (uint i = 0; i < 30; i++) {
                     iosConfig[i] = bufferIosConfig[i];
                 }
 
+                //Recuperando o CRC recebido do buffer.
+                uint8_t crcResHigh = bufferIosConfig[30];
+                uint8_t crcResLow = bufferIosConfig[31];
+                uint16_t crcRecebido = (uint16_t)((crcResHigh << 8) + crcResLow);
+
                 //Recalculando o CRC.
-                uint16_t crcCalculado = this->calcCRC(iosConfig, 20);
+                uint16_t crcCalculado = this->calcCRC(iosConfig, 30);
 
                 //Comparando se o CRC recalculado e o CRC recebido do buffer são iguais.
                 if (crcCalculado == crcRecebido) {
 
-                    //Arrays com as configurações de modo e zona das IOs.
-                    uint8_t iosModes[10];
-                    uint8_t iosZones[10];
-
-                    //Preenchendo as arrays.
-                    
-                    uint8_t indexCount = 0;
-                    for (uint i = 0; i < 10; i++)
-                    {
-                        iosModes[indexCount] = iosConfig[i];
-                        indexCount++;
-                    }
-
-                    indexCount = 0;
-
-                    for (uint i = 10; i < 20; i++)
-                    {
-                        iosZones[indexCount] = iosConfig[i];
-                        indexCount++;
-                    }
-
                     //Gravando modos e zonas dos IOs na flash.
-                    this->SetupIosModesFlash(iosModes);
-                    this->SetupIosZonesFlash(iosZones);
+                    this->SetupIosConfig(iosConfig);
 
                     break;
 
@@ -571,14 +548,15 @@ public:
     void GetIoConfig(uint32_t zone) {
 
         String res = "";
-        uint8_t bufferData[20] = {0};
+        uint8_t bufferData[30] = {0};
 
-        //Lendo os 20 endereços da memória associada aos IOs (modos e zonas).
-        if (api.system.flash.get(10000, bufferData, 20)) {
+        //Separando os valores de configuração em duas arrays diferentes (modos, zonas e timers das zonas).
+        uint8_t iosModes[10];
+        uint8_t iosZones[10];
+        uint16_t timerZones[5];
 
-            //Separando os valores de configuração em duas arrays diferentes (modos e zonas).
-            uint8_t iosModes[10];
-            uint8_t iosZones[10];
+        //Lendo os 30 endereços da memória (modos e zonas dos IOs e timers das zonas).
+        if (api.system.flash.get(10000, bufferData, 30)) {
 
             uint8_t indexCount = 0;
             for (uint i = 0; i < 10; i++)
@@ -592,6 +570,17 @@ public:
             for (uint i = 10; i < 20; i++)
             {
                 iosZones[indexCount] = bufferData[i];
+                indexCount++;
+            }
+
+            indexCount = 0;
+
+            for (uint i = 20; i < 30; i += 2)
+            {
+                uint8_t byteHigh = bufferData[i];
+                uint8_t byteLow = bufferData[i + 1];
+
+                timerZones[indexCount] = (uint16_t)((byteHigh << 8) + byteLow);
                 indexCount++;
             }
 
@@ -616,9 +605,12 @@ public:
             }
         }
 
-        Serial.printf("\nIOs associados a zona/timer ID %d:\n", zone);
+        Serial.print("\nIOs associados a zona/timer ID ");
+        Serial.print(zone);
+        Serial.print(" (tempo do timer definido: ");
+        Serial.print(timerZones[zone]);
+        Serial.print(")\n");
         Serial.print(res);
-
     }
 
     String GetLastReceivedTextData() {
