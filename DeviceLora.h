@@ -234,16 +234,6 @@ protected:
 
     }
 
-    /// @brief Inicializa estado lógico das IOs na memória flash. Offsets do 10000 ao 10009 (seguindo a ordem dos IOs).
-    void SetupIosModesFlash(uint8_t iosModes[10]) {
-        api.system.flash.set(10000, iosModes, 10);
-    }
-
-    /// @brief Inicializa timers/zonas na memória flash. Offsets do 1000A ao 10013 (seguindo a ordem dos IOs).
-    void SetupIosZonesFlash(uint8_t iosZones[10]) {
-        api.system.flash.set(10010, iosZones, 10);
-    }
-
     /// @brief Inicializa modos, zonas e timers dos IOs na memória flash. Offsets do 10000 ao 10030 (seguindo a ordem dos IOs).
     /// @param iosConfig 
     void SetupIosConfig(uint8_t iosConfig[30]) {
