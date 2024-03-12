@@ -22,6 +22,15 @@ Biblioteca de configuração e desenvolvimento de firmwares customizados baseada
     - [SetAppkey()](#setappkey)
   + [Geral](#geral)
     - [Setup()](#setup)
+    - [SetupFlash()](#setupflash)
+    - [GetIosModes()](#getiosmodes)
+    - [GetIosZones()](#getioszones)
+    - [GetIoConfig()](#getioconfig)
+    - [GetTimer0()](#gettimer0)
+    - [GetTimer1()](#gettimer1)
+    - [GetTimer2()](#gettimer2)
+    - [GetTimer3()](#gettimer3)
+    - [GetTimer4()](#gettimer4)
     - [SendData()](#senddata)
     - [GetDeviceEUI()](#getdeviceeui)
     - [SetDeviceEUI()](#setdeviceeui)
@@ -535,6 +544,336 @@ void setup() {
 void loop() {
 
 }
+```
+
+<br><hr><br>
+
+### SetupFlash()
+Inicializa os modos e zonas dos IOs e os tempos dos timers de zona na memória flash do dispositivo.
+
+```cs
+SetupFlash();
+```
+
+Para inicializá-los, a execução do sketch aguardará 5 segundos até que as informações de configuração sejam enviadas via serial para o dispositivo. Caso contrário, a execução do sketch seguirá normalmente.
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+
+}
+
+void loop() {
+
+} 
+```
+
+Uma vez que as informações de configuração são recebidas na serial dentro deste intervalo, esses dados serão gravados em uma sequência de bytes dentro da memória flash do dispositivo, das quais podem ser consultadas por outros métodos de classe.
+
+<br><hr><br>
+
+### GetIosModes()
+Exibe os estados lógicos dos pinos IOs.
+
+```cs
+GetIoModes();
+```
+
+<br><hr><br>
+
+### GetIosZones()
+Exibe as zonas definidas dos pinos IOs.
+
+```cs
+GetIosZones();
+```
+
+<br><hr><br>
+
+### GetIoConfig()
+Exibe detalhadamente as configurações dos IOs na flash, de acordo com a zona associada.
+
+```cp
+GetIoConfig(uint8_t zone);
+```
+
+Este método deve ser utilizado e associado com os handlers de cada zona disponível para executar uma função de acordo com o seu valor de tempo. As zonas vão de 0 a 4 e cada uma possui um valor de tempo que executa suas funções handlers associadas, valor de tempo esse acessado por métodos **GetTimer** da classe de instância de conexão.
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+//Timer handlers
+void timer0 (void* data) { abp.GetIoConfig(0); }
+void timer1 (void* data) { abp.GetIoConfig(1); }
+void timer2 (void* data) { abp.GetIoConfig(2); }
+void timer3 (void* data) { abp.GetIoConfig(3); }
+void timer4 (void* data) { abp.GetIoConfig(4); }
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+
+    //Registrando os timer handlers.
+    api.system.timer.create(RAK_TIMER_0, (RAK_TIMER_HANDLER)timer0, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_0, abp.GetTimer0(), NULL);
+
+    api.system.timer.create(RAK_TIMER_1, (RAK_TIMER_HANDLER)timer1, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_1, abp.GetTimer1(), NULL);
+
+    api.system.timer.create(RAK_TIMER_2, (RAK_TIMER_HANDLER)timer2, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_2, abp.GetTimer2(), NULL);
+
+    api.system.timer.create(RAK_TIMER_3, (RAK_TIMER_HANDLER)timer3, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_3, abp.GetTimer3(), NULL);
+
+    api.system.timer.create(RAK_TIMER_4, (RAK_TIMER_HANDLER)timer4, RAK_TIMER_ONESHOT);
+    api.system.timer.start(RAK_TIMER_4, abp.GetTimer4(), NULL);
+
+}
+
+void loop() {
+
+} 
+```
+
+Os métodos **GetTimer** (`GetTimer0()`, `GetTimer1()`, etc.) retornam o valor do timer atual gravado na memória flash do dispositivo. Esse valor define quanto tempo o handler precisa esperar para ser executado (uma vez que no registro dos handlers no `Setup`, o modo configurado é o `RAK_TIMER_ONESHOT`, que possui esse comportamento de executar uma vez dentro desse tempo limite). O método `GetIoConfig()` recebe o valor da zona e é chamado dentro de seus handlers, também associados a uma zona. Isso vai retornar na serial, dentro de cada tempo definido, as configurações de modo dos IOs e em que cada zona eles pertencem.
+
+**Saída no monitor serial:**
+
+```
+Current Work Mode: LoRaWAN.
+
+IOs associados a zona/timer ID 0 (tempo do timer definido: 2000)
+PA8 (Saida Digital)
+PA9 (Saida Digital)
+
+IOs associados a zona/timer ID 1 (tempo do timer definido: 4000)
+
+IOs associados a zona/timer ID 2 (tempo do timer definido: 6000)
+PA15 (Saida Digital)
+PA0 (Entrada Analogica)
+PB3 (Entrada Digital)
+
+IOs associados a zona/timer ID 3 (tempo do timer definido: 8000)
+PB5 (Entrada Analogica)
+PB4 (Entrada Analogica)
+PB12 (Entrada Analogica)
+
+IOs associados a zona/timer ID 4 (tempo do timer definido: 14000)
+PA1 (Entrada Analogica)
+PA2 (Saida Digital)
+```
+
+<br><hr><br>
+
+### GetTimer0()
+Retorna o valor definido como tempo na zona 0.
+
+```cs
+GetTimer0();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+    
+}
+
+void loop() {
+    Serial.print("Tempo definido na zona 0: ");
+    Serial.println(abp.GetTimer0());
+    delay(3000);
+} 
+```
+
+<br><hr><br>
+
+### GetTimer1()
+Retorna o valor definido como tempo na zona 1.
+
+```cs
+GetTimer1();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+    
+}
+
+void loop() {
+    Serial.print("Tempo definido na zona 1: ");
+    Serial.println(abp.GetTimer1());
+    delay(3000);
+} 
+```
+
+<br><hr><br>
+
+### GetTimer2()
+Retorna o valor definido como tempo na zona 2.
+
+```cs
+GetTimer2();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+    
+}
+
+void loop() {
+    Serial.print("Tempo definido na zona 2: ");
+    Serial.println(abp.GetTimer2());
+    delay(3000);
+} 
+```
+
+<br><hr><br>
+
+### GetTimer3()
+Retorna o valor definido como tempo na zona 3.
+
+```cs
+GetTimer3();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+    
+}
+
+void loop() {
+    Serial.print("Tempo definido na zona 3: ");
+    Serial.println(abp.GetTimer3());
+    delay(3000);
+} 
+```
+
+<br><hr><br>
+
+### GetTimer4()
+Retorna o valor definido como tempo na zona 4.
+
+```cs
+GetTimer4();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+    
+}
+
+void loop() {
+    Serial.print("Tempo definido na zona 4: ");
+    Serial.println(abp.GetTimer4());
+    delay(3000);
+} 
 ```
 
 <br><hr><br>
