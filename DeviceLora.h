@@ -9,6 +9,14 @@ protected:
     //String com as IOs. Essa é ordem de configuração dos modos e zonas dos IOs na memória flash do device.
     String iosString[10] = {"PA15", "PA1", "PA8", "PA9", "PA0", "PB5", "PB4", "PB3", "PA2", "PB12"};
 
+    //Propriedade com o valor dos timers.
+    uint16_t timer0;
+    uint16_t timer1;
+    uint16_t timer2;
+    uint16_t timer3;
+    uint16_t timer4;
+
+    //Chaves de conexão e definições gerais do dispositivo
     int joinMode;
     String appskey;
     String nwkskey;
@@ -240,7 +248,36 @@ protected:
         api.system.flash.set(10000, iosConfig, 30);
     }
 
-    uint16_t calcCRC(uint8_t buffer[], uint8_t length) {
+    /// @brief Inicializa as propriedades de zona com os valores dos timers.
+    void SetTimersProperty() {
+        
+        //Array que vai receber os valores de timer.
+        uint16_t timers[5];
+
+        //Buffer que vai ser preenchido com os bytes dos valores de timer.
+        uint8_t bufferTimers[10];
+
+        if (api.system.flash.get(10020, bufferTimers, 10)) {
+
+            //Preenchendo o array com os valores de timer + atribuindo os valores nas propriedades.
+            uint indexCount = 0;
+            for (uint i = 0; i < 10; i += 2) {
+                uint8_t byteHigh = bufferTimers[i];
+                uint8_t byteLow = bufferTimers[i + 1];
+
+                timers[indexCount] = (uint16_t)((byteHigh << 8) + byteLow);
+                indexCount++;
+            }
+
+            this->timer0 = timers[0];
+            this->timer1 = timers[1];
+            this->timer2 = timers[2];
+            this->timer3 = timers[3];
+            this->timer4 = timers[4];
+        }
+    }
+
+    uint16_t CalcCRC(uint8_t buffer[], uint8_t length) {
         uint16_t crc = 0xFFFF;
 
         for (uint pos = 0; pos < length; pos++) {
@@ -264,15 +301,15 @@ protected:
 
     }
 
-    uint8_t getCRCHigh(uint8_t buffer[], uint8_t length)
+    uint8_t GetCRCHigh(uint8_t buffer[], uint8_t length)
     {
-        uint16_t crc = this->calcCRC(buffer, length);
+        uint16_t crc = this->CalcCRC(buffer, length);
         return (uint8_t)(crc >> 8);
     }
 
-    uint8_t getCRCLow(uint8_t buffer[], uint8_t length)
+    uint8_t GetCRCLow(uint8_t buffer[], uint8_t length)
     {
-        uint16_t crc = this->calcCRC(buffer, length);
+        uint16_t crc = this->CalcCRC(buffer, length);
         return (uint8_t)(crc & 0x00FF);
     }
 
@@ -481,12 +518,15 @@ public:
                 uint16_t crcRecebido = (uint16_t)((crcResHigh << 8) + crcResLow);
 
                 //Recalculando o CRC.
-                uint16_t crcCalculado = this->calcCRC(iosConfig, 30);
+                uint16_t crcCalculado = this->CalcCRC(iosConfig, 30);
 
                 //Comparando se o CRC recalculado e o CRC recebido do buffer são iguais.
                 if (crcCalculado == crcRecebido) {
 
-                    //Gravando modos e zonas dos IOs na flash.
+                    //Atualizando as propriedades de timers do objeto com os novos valores da flash.
+                    this->SetTimersProperty();
+
+                    //Gravando modos, zonas dos IOs e tempo dos timers na flash.
                     this->SetupIosConfig(iosConfig);
 
                     break;
@@ -601,6 +641,26 @@ public:
         Serial.print(timerZones[zone]);
         Serial.print(")\n");
         Serial.print(res);
+    }
+
+    uint16_t GetTimer0() {
+        return this->timer0;
+    }
+
+    uint16_t GetTimer1() {
+        return this->timer1;
+    }
+
+    uint16_t GetTimer2() {
+        return this->timer2;
+    }
+
+    uint16_t GetTimer3() {
+        return this->timer3;
+    }
+
+    uint16_t GetTimer4() {
+        return this->timer4;
     }
 
     String GetLastReceivedTextData() {
