@@ -44,6 +44,9 @@ public:
 
     void Setup() {
 
+        //Lê os valores de timer da flash e atribui nas propriedades de timer da classe.
+        this->SetTimersProperty();
+
         //Enviando chaves + configuração do device.
         this->JoinMode(RAK_LORA_OTAA);
         

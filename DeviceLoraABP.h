@@ -57,6 +57,9 @@ public:
     /// @brief Inicializa instância de conexão.
     void Setup() {
 
+        //Lê os valores de timer da flash e atribui nas propriedades de timer da classe.
+        this->SetTimersProperty();
+
         //Enviando chaves + configurações do device
         this->JoinMode(RAK_LORA_ABP);
 
