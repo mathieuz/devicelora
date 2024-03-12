@@ -575,6 +575,8 @@ public:
         Serial.print(res);
     }
 
+    /// @brief Exibe detalhadamente as configurações dos IOs na flash, de acordo com a zona associada.
+    /// @param zone Um valor referente a uma das zonas possíveis (0, 1, 2, 3 ou 4).
     void GetIoConfig(uint32_t zone) {
 
         String res = "";
