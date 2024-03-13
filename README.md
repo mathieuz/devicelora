@@ -25,6 +25,7 @@ Biblioteca de configuração e desenvolvimento de firmwares customizados baseada
     - [SetupFlash()](#setupflash)
     - [GetIosModes()](#getiosmodes)
     - [GetIosZones()](#getioszones)
+    - [GetTimersZones()](#gettimerszones)
     - [GetIoConfig()](#getioconfig)
     - [GetTimer0()](#gettimer0)
     - [GetTimer1()](#gettimer1)
@@ -594,6 +595,50 @@ Exibe os estados lógicos dos pinos IOs.
 GetIoModes();
 ```
 
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+
+}
+
+void loop() {
+    abp.GetIosModes();
+    delay(4000);
+} 
+```
+
+**Saída no monitor serial:**
+
+```
+Modos dos IOs:
+PA15: (Saida Digital)
+PA1: (Entrada Analogica)
+PA8: (Entrada Digital)
+PA9: (Entrada Analogica)
+PA0: (Entrada Digital)
+PB5: (Saida Digital)
+PB4: (Saida Digital)
+PB3: (Entrada Digital)
+PA2: (Entrada Analogica)
+PB12: (Saida Digital)
+```
+
 <br><hr><br>
 
 ### GetIosZones()
@@ -601,6 +646,97 @@ Exibe as zonas definidas dos pinos IOs.
 
 ```cs
 GetIosZones();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+
+}
+
+void loop() {
+    abp.GetIosZones();
+    delay(4000);
+} 
+```
+
+**Saída no monitor serial:**
+
+```
+PA15: Zona 3
+PA1: Zona 0
+PA8: Zona 2
+PA9: Zona 0
+PA0: Zona 4
+PB5: Zona 0
+PB4: Zona 1
+PB3: Zona 3
+PA2: Zona 3
+PB12: Zona 2
+```
+
+<br><hr><br>
+
+### GetTimersZones()
+Exibe o valor de timer das zonas.
+
+```cs
+GetTimersZones();
+```
+
+**Exemplo:**
+
+```cpp
+#include "DeviceLora.h"
+#include "DeviceLoraABP.h"
+#include "DeviceLoraOTAA.h"
+
+//Instância de conexão LoRa.
+DeviceLoraABP abp("02c27d69", "164d904dd7688c5b6649805b818d4c37", "a31dbce5ee57af45dfccb2f63a8a72ba", "AC1F09FFFE090B61", 'C', 0x0001);
+
+
+void setup() {
+    Serial.begin(115200);
+
+    //Finalizando instância de conexão.
+    abp.Setup();
+
+    //Aguarda os bytes das configurações dos IOs por 5 segundos.
+    abp.SetupFlash();
+
+}
+
+void loop() {
+    abp.GetTimersZones();
+    delay(4000);
+} 
+```
+
+**Saída no monitor serial:**
+
+```
+Timers definidos nos IOs:
+Zona 0: 2540
+Zona 1: 3452
+Zona 2: 4586
+Zona 3: 5869
+Zona 4: 6774
 ```
 
 <br><hr><br>
