@@ -548,12 +548,23 @@ public:
             for (uint i = 0; i < 10; i++) {
                 res += iosString[i];
                 res += ": ";
-                res += (String)bufferData[i];
+
+                if (bufferData[i] == 0) {
+                    res += "(Entrada Digital)";
+
+                } else if (bufferData[i] == 1) {
+                    res += "(Saida Digital)";
+
+                } else {
+                    res += "(Entrada Analogica)";
+
+                }
+
                 res += "\n";
             }
         }
 
-        Serial.println("\nEstado lógico dos IOs:");
+        Serial.println("\nModos dos IOs:");
         Serial.print(res);
     }
 
@@ -566,12 +577,37 @@ public:
             for (uint i = 0; i < 10; i++) {
                 res += iosString[i];
                 res += ": ";
+                res += "Zona ";
                 res += (String)bufferData[i];
                 res += "\n";
             }
         }
 
         Serial.println("\nZonas definidas nos IOs:");
+        Serial.print(res);
+    }
+
+    /// @brief Exibe os valores de timer das zonas.
+    void GetTimersZones() {
+        String res = "";
+
+        res += "Zona 0: ";
+        res += this->timer0;
+        res += "\n";
+        res += "Zona 1: ";
+        res += this->timer1;
+        res += "\n";
+        res += "Zona 2: ";
+        res += this->timer2;
+        res += "\n";
+        res += "Zona 3: ";
+        res += this->timer3;
+        res += "\n";
+        res += "Zona 4: ";
+        res += this->timer4;
+        res += "\n";
+
+        Serial.println("\nTimers definidos nos IOs:");
         Serial.print(res);
     }
 
